@@ -331,6 +331,8 @@ public class GraphicsUtil {
 	 *
 	 * @return array containing inputs for CPPN
 	 */
+	
+	//This is the file I need to change: Amy
 	public static double[] get2DObjectCPPNInputs(int x, int y, int imageWidth, int imageHeight, double time) {
 		ILocated2D scaled = CartesianGeometricUtilities.centerAndScale(new Tuple2D(x, y), imageWidth, imageHeight);
 		if(time == -1) { // default, single image. Do not care about time
