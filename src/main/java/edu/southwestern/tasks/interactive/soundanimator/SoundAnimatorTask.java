@@ -1,17 +1,45 @@
 package edu.southwestern.tasks.interactive.soundanimator;
 
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.networks.Network;
+import edu.southwestern.parameters.Parameters;
 import edu.southwestern.tasks.interactive.animationbreeder.AnimationBreederTask;
+import edu.southwestern.util.graphics.AnimationUtil;
+import edu.southwestern.util.sound.SoundToArray;
 
 public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T> {
 
+	// Save sound amplitudes here
+	private double[] soundArray;
+	
 	public SoundAnimatorTask() throws IllegalAccessException {
 		super();
+		
+		// TODO: Replace this with interesting values loaded from a file.
+		soundArray = new double[50];
+		// TODO: Something like this:
+		//soundArray = SoundToArray.readDoubleArrayFromStringAudio(<relative path to WAV file>);
+
+	}
+	
+	protected BufferedImage[] getAnimationImages(T cppn, int startFrame, int endFrame, boolean beingSaved) {
+		// TODO: Redefine this to use modified version of imagesFromCPPN that takes sound array input
+		return AnimationUtil.imagesFromCPPN(cppn, picSize, picSize, startFrame, endFrame, getInputMultipliers());
 	}
 
+	@Override
+	public int numCPPNInputs() {
+		return 0; // define 
+	}
+
+	@Override
+	public int numCPPNOutputs() {
+		return 0; // define
+	}
+	
 	/**
 	 * Allows for quick and easy launching without saving any files
 	 * @param args
