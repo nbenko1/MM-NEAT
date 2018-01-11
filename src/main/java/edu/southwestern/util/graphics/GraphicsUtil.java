@@ -337,7 +337,7 @@ public class GraphicsUtil {
 	{
 		//if(!soundInput)
 		//{
-			System.out.println("Time: " + time);
+			//System.out.println("Time: " + time);
 			ILocated2D scaled = CartesianGeometricUtilities.centerAndScale(new Tuple2D(x, y), imageWidth, imageHeight);
 			if(time == -1) 
 			{ // default, single image. Do not care about time
