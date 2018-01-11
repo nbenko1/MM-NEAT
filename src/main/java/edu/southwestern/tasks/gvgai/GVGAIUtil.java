@@ -185,7 +185,7 @@ public class GVGAIUtil {
 		for(int y = 1; y < levelHeight+1; y++) {
 			for(int x = 1; x < levelWidth+1; x++) {
 				// Able to use a method from GraphicsUtil here. The -1 is time, which is ignored.
-				double[] inputs = GraphicsUtil.get2DObjectCPPNInputs(x, y, levelWidth, levelHeight, -1);
+				double[] inputs = GraphicsUtil.get2DObjectCPPNInputs(x, y, levelWidth, levelHeight, -1,false);
 				// Multiplies the inputs by the inputMultiples; used to turn on or off the effects in each input
 				for(int i = 0; i < inputMultiples.length; i++) {
 					inputs[i] = inputs[i] * inputMultiples[i];
