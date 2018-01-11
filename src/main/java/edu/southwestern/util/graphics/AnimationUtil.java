@@ -35,8 +35,15 @@ public class AnimationUtil {
 	 * @return Array of images that can be animated in a JApplet
 	 */
 	public static BufferedImage[] imagesFromCPPN(Network n, int imageWidth, int imageHeight, int startTime, int endTime, double[] inputMultiples) {
+		// Final null input means no sound inputs are provided
+		return imagesFromCPPN(n, imageWidth, imageHeight, startTime, endTime, inputMultiples, null);
+	}
+	
+	// Full version of method that can also take sound wave input
+	public static BufferedImage[] imagesFromCPPN(Network n, int imageWidth, int imageHeight, int startTime, int endTime, double[] inputMultiples, double[] soundAmplitude) {
 		BufferedImage[] images = new BufferedImage[endTime-startTime];
 		for(int i = startTime; i < endTime; i++) {
+			// TODO: Add sound wave
 			images[i-startTime] = GraphicsUtil.imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, i/FRAMES_PER_SEC);
 		}
 		return images;
