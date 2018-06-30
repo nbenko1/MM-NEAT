@@ -39,12 +39,28 @@ public class AnimationUtil {
 		return imagesFromCPPN(n, imageWidth, imageHeight, startTime, endTime, inputMultiples, null);
 	}
 	
-	// Full version of method that can also take sound wave input
+	/**
+	 * Full version of method that can also take sound wave input.
+	 * A null soundAmplitude creates an animation based on time (linearly increasing value).
+	 * Otherwise, the sound amplitude creates the animation.
+	 * 
+	 * @param n CPPN network
+	 * @param imageWidth 
+	 * @param imageHeight
+	 * @param startTime Start time within sound array or time frame
+	 * @param endTime End time in sound array or time frame
+	 * @param inputMultiples For filtering CPPN inputs
+	 * @param soundAmplitude Array of amplitude values corresponding to sounds
+	 * @return Array of images to create an animation
+	 */
 	public static BufferedImage[] imagesFromCPPN(Network n, int imageWidth, int imageHeight, int startTime, int endTime, double[] inputMultiples, double[] soundAmplitude) {
+		//System.out.println("From " + startTime + " to " + endTime + " " + Arrays.toString(soundAmplitude));
 		BufferedImage[] images = new BufferedImage[endTime-startTime];
 		for(int i = startTime; i < endTime; i++) {
-			// TODO: Add sound wave
-			images[i-startTime] = GraphicsUtil.imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, i/FRAMES_PER_SEC);
+			images[i-startTime] = GraphicsUtil.imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, 
+					soundAmplitude == null ? 
+							i/FRAMES_PER_SEC :  // This default version uses a time input (index divided by frames)
+							soundAmplitude[i]); // Use sound array amplitude as CPPN input
 		}
 		return images;
 	}		

@@ -823,6 +823,7 @@ public class Parameters {
 		stringOptions.add("seedArchetype3", "", "Archetype for seed sub-population 3");
 		stringOptions.add("seedArchetype4", "", "Archetype for seed sub-population 4");
 		stringOptions.add("seedGenotype", "", "Path to xml file with seed genotype for population");
+		stringOptions.add("soundAnimationWAVFile", SoundUtilExamples.HARP_WAV, "Input WAV file to sound animator");
 		stringOptions.add("utDrive", "C", "Drive where UT2004 resides");
 		stringOptions.add("utMap", "DM-TrainingDay", "Map to play in Unreal Tournament 2004");
 		stringOptions.add("utPath", "SCOPE2018\\UT2004", "Path (excluding drive) to root dir of Unreal Tournament 2004 installation");
