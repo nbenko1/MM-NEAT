@@ -18,16 +18,17 @@ public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T
 	public SoundAnimatorTask() throws IllegalAccessException {
 		super();
 		// TODO: Change parameter to one specific to animations
-		soundArray = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
+		//soundArray = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
 		//soundArray = RandomNumbers.randomArray(30);
-//		soundArray = new double[30];
-//		for(int i = 0; i < soundArray.length; i++) {
-//			soundArray[i] = i/AnimationUtil.FRAMES_PER_SEC;
-//		}
+		soundArray = new double[50];
+		for(int i = 0; i < soundArray.length; i++) {
+			soundArray[i] = i/AnimationUtil.FRAMES_PER_SEC;
+		}
 //		soundArray = null;		
 	}
 	
 	protected BufferedImage[] getAnimationImages(T cppn, int startFrame, int endFrame, boolean beingSaved) {
+		System.out.println("start:"+startFrame + ",end:"+endFrame);
 		return AnimationUtil.imagesFromCPPN(cppn, picSize, picSize, startFrame, endFrame, getInputMultipliers(), soundArray);
 	}
 	

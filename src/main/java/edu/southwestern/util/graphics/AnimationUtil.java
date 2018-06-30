@@ -61,6 +61,7 @@ public class AnimationUtil {
 					soundAmplitude == null ? 
 							i/FRAMES_PER_SEC :  // This default version uses a time input (index divided by frames)
 							soundAmplitude[i]); // Use sound array amplitude as CPPN input
+							//soundAmplitude[i]); // Use sound array amplitude as CPPN input
 		}
 		return images;
 	}		
