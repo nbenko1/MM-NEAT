@@ -155,6 +155,7 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 	@SuppressWarnings("unchecked")
 	public AnimationBreederTask(boolean justAnimationBreeder, boolean shouldAlwaysAnimate, int overrideForAnimationLength) throws IllegalAccessException {
 		super();
+		Parameters.parameters.setBoolean("alwaysAnimate", shouldAlwaysAnimate);
 		// Override animation length (used by sound animation)
 		if(overrideForAnimationLength != -1) {
 			// In this special case, the default animation length is reset before any other processing

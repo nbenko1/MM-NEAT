@@ -34,7 +34,7 @@ public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T
 	
 	@Override
 	protected BufferedImage getButtonImage(T phenotype, int width, int height, double[] inputMultipliers) {
-		// Just get first frame for button. Slightly inefficent though, since all animation frames were pre-computed
+		// Just get first frame for button. Slightly inefficient though, since all animation frames were pre-computed
 		return AnimationUtil.imagesFromCPPN(phenotype, picSize, picSize, 0, 1, getInputMultipliers(), new double[] {soundArray[0]})[0];
 	}
 
