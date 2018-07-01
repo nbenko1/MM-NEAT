@@ -28,7 +28,8 @@ public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T
 	 */
 	public static int soundLength() {
 		double[] temp = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
-		return temp.length;
+		// Sound files can be extremely long, and often need to be shortened
+		return (int) Math.min(temp.length, Parameters.parameters.integerParameter("defaultAnimationLength"));
 	}
 	
 	@Override

@@ -80,7 +80,7 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 				//adds images to array at index of specified button (imageID)
 				if(animations[imageID].size() < Parameters.parameters.integerParameter("defaultAnimationLength")) {
 					int start = animations[imageID].size();
-//					try {
+					try {
 						BufferedImage[] newFrames = getAnimationImages(scores.get(imageID).individual.getPhenotype(), start, end, false);
 						for(BufferedImage bi : newFrames) {
 							if(abort) break; // stop loading if animation is aborted
@@ -92,11 +92,11 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 								animations[imageID].add(newFrames[i]);
 							}
 						}
-//					} catch(IndexOutOfBoundsException e) {
-//						// Suppressing this exception seems like a bad idea.
-//						System.out.println("Scores not ready for animation " + imageID);
-//						abort = true;
-//					}
+					} catch(IndexOutOfBoundsException e) {
+						// Suppressing this exception seems like a bad idea.
+						System.out.println("Scores not ready for animation " + imageID);
+						abort = true;
+					}
 				}
 			}
 			buttons.get(imageID).setCursor(Cursor.getDefaultCursor()); //turn off busy cursor after animations have finished loading
