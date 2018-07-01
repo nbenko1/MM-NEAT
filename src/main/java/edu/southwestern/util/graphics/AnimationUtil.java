@@ -57,11 +57,7 @@ public class AnimationUtil {
 		//System.out.println("From " + startTime + " to " + endTime + " " + Arrays.toString(soundAmplitude));
 		BufferedImage[] images = new BufferedImage[endTime-startTime];
 		for(int i = startTime; i < endTime; i++) {
-			images[i-startTime] = GraphicsUtil.imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, 
-					soundAmplitude == null ? 
-							i/FRAMES_PER_SEC :  // This default version uses a time input (index divided by frames)
-							soundAmplitude[i]); // Use sound array amplitude as CPPN input
-							//soundAmplitude[i]); // Use sound array amplitude as CPPN input
+			images[i-startTime] = GraphicsUtil.imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, i/FRAMES_PER_SEC, soundAmplitude == null ? -1.0 : soundAmplitude[i], soundAmplitude != null);
 		}
 		return images;
 	}		

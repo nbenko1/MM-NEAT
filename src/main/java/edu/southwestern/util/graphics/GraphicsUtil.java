@@ -7,6 +7,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -73,12 +74,12 @@ public class GraphicsUtil {
 	 */
 	public static BufferedImage imageFromCPPN(Network n, int imageWidth, int imageHeight) {
 		//-1 indicates that we don't care about time
-		return imageFromCPPN(n,imageWidth,imageHeight, ArrayUtil.doubleOnes(PicbreederTask.CPPN_NUM_INPUTS), -1);
+		return imageFromCPPN(n,imageWidth,imageHeight, ArrayUtil.doubleOnes(PicbreederTask.CPPN_NUM_INPUTS), -1, -1, false);
 	}
 
 	/**
 	 * Default version of Buffered Image creation used for Picbreeder. Takes input multipliers into account,
-	 * but time is irrelevant so it is defaulted to -1.
+	 * but time is irrelevant so it is defaulted to -1. Also ignores the inputs for sound animations.
 	 * 
 	 * @param n CPPN
 	 * @param imageWidth width of image
@@ -87,7 +88,7 @@ public class GraphicsUtil {
 	 * @return buffered image containing image drawn by network
 	 */
 	public static BufferedImage imageFromCPPN(Network n, int imageWidth, int imageHeight, double[] inputMultiples) {
-		return imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, -1);
+		return imageFromCPPN(n, imageWidth, imageHeight, inputMultiples, -1, -1, false);
 	}
 
 	/**
@@ -101,11 +102,11 @@ public class GraphicsUtil {
 	 *            height of image
 	 * @return buffered image containing image drawn by network
 	 */
-	public static BufferedImage imageFromCPPN(Network n, int imageWidth, int imageHeight, double[] inputMultiples, double time) {
+	public static BufferedImage imageFromCPPN(Network n, int imageWidth, int imageHeight, double[] inputMultiples, double time, double sound, boolean incorporateSound) {
 		BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
 		for (int x = 0; x < imageWidth; x++) {// scans across whole image
 			for (int y = 0; y < imageHeight; y++) {
-				float[] hsb = getHSBFromCPPN(n, x, y, imageWidth, imageHeight, inputMultiples, time);
+				float[] hsb = getHSBFromCPPN(n, x, y, imageWidth, imageHeight, inputMultiples, time, sound, incorporateSound);
 				// network outputs computed on hsb, not rgb scale because
 				// creates better images
 				Color childColor = Color.getHSBColor(hsb[HUE_INDEX], hsb[SATURATION_INDEX], hsb[BRIGHTNESS_INDEX]);
@@ -284,18 +285,22 @@ public class GraphicsUtil {
 	 *
 	 * @return double containing the HSB values
 	 */
-	
-	public static boolean defaultSoundInput = true;
-	public static float[] getHSBFromCPPN(Network n, int x, int y, int imageWidth, int imageHeight, double[] inputMultiples, double time) {
-		double[] input = get2DObjectCPPNInputs(x, y, imageWidth, imageHeight, time,defaultSoundInput);
-
+	public static float[] getHSBFromCPPN(Network n, int x, int y, int imageWidth, int imageHeight, double[] inputMultiples, double time, double sound, boolean incorporateSound) {
+		double[] input = get2DObjectCPPNInputs(x, y, imageWidth, imageHeight, time, sound, incorporateSound);
+		try {
 			// Multiplies the inputs of the pictures by the inputMultiples; used to turn on or off the effects in each picture
 			for(int i = 0; i < inputMultiples.length; i++) {
 				input[i] = input[i] * inputMultiples[i];
 			}
-			// Eliminate recurrent activation for consistent images at all resolutions
-			n.flush();
-			return rangeRestrictHSB(n.process(input));
+		} catch(IndexOutOfBoundsException e) {
+			System.out.println("input:" + Arrays.toString(input));
+			System.out.println("inputMultiples:" + Arrays.toString(inputMultiples));
+			e.printStackTrace();
+			System.exit(1);
+		}
+		// Eliminate recurrent activation for consistent images at all resolutions
+		n.flush();
+		return rangeRestrictHSB(n.process(input));
 	}
 
 	/**
@@ -332,32 +337,16 @@ public class GraphicsUtil {
 	 * @return array containing inputs for CPPN
 	 */
 	
-	//This is the file I need to change: Amy
-	public static double[] get2DObjectCPPNInputs(int x, int y, int imageWidth, int imageHeight, double time, boolean soundInput) 
-	{
-		//if(!soundInput)
-		//{
-			//System.out.println("Time: " + time);
-			ILocated2D scaled = CartesianGeometricUtilities.centerAndScale(new Tuple2D(x, y), imageWidth, imageHeight);
-			if(time == -1) 
-			{ // default, single image. Do not care about time
-				return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, BIAS };
-			}	 
-			else 
-			{ // TODO: May need to divide time by frame rate later
-				return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, time, BIAS, 0 };
-			}
-		//}
-		/*System.out.println("Time: " + time);
+	public static double[] get2DObjectCPPNInputs(int x, int y, int imageWidth, int imageHeight, double time, double sound, boolean incorporateSound) {
 		ILocated2D scaled = CartesianGeometricUtilities.centerAndScale(new Tuple2D(x, y), imageWidth, imageHeight);
-		if(time == -1) 
-		{ // default, single image. Do not care about time
-			return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, BIAS};
-		}	 
-		else 
-		{ // TODO: May need to divide time by frame rate later
+		if(incorporateSound) { // Include both time and sound inputs for sound animations
+			return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, time, sound, BIAS };
+		} else if(time == -1) { // default, single image. Do not care about time or sound
+			return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, BIAS };
+		} else { // Create an animation, but do not use sound
+			assert !incorporateSound;
 			return new double[] { scaled.getX(), scaled.getY(), scaled.distance(new Tuple2D(0, 0)) * SQRT2, time, BIAS };
-		}*/
+		}
 	}
 
 	/**

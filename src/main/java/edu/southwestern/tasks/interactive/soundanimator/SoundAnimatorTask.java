@@ -16,20 +16,46 @@ public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T
 	private double[] soundArray;
 	
 	public SoundAnimatorTask() throws IllegalAccessException {
-		super();
-		// TODO: Change parameter to one specific to animations
-		//soundArray = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
-		//soundArray = RandomNumbers.randomArray(30);
-		soundArray = new double[50];
-		for(int i = 0; i < soundArray.length; i++) {
-			soundArray[i] = i/AnimationUtil.FRAMES_PER_SEC;
-		}
-//		soundArray = null;		
+		super(false, false, soundLength());
+		soundArray = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
+	}
+
+	/**
+	 * This length value is required for the super constructor, so the sound file
+	 * gets loaded here just to get the length of the sound, and again in the actual
+	 * constructor.
+	 * @return Length of sound clip for animations
+	 */
+	public static int soundLength() {
+		double[] temp = SoundToArray.readDoubleArrayFromStringAudio(Parameters.parameters.stringOptions.get("soundAnimationWAVFile"));
+		return temp.length;
 	}
 	
+	@Override
+	protected BufferedImage getButtonImage(T phenotype, int width, int height, double[] inputMultipliers) {
+		// Just get first frame for button. Slightly inefficent though, since all animation frames were pre-computed
+		return AnimationUtil.imagesFromCPPN(phenotype, picSize, picSize, 0, 1, getInputMultipliers(), new double[] {soundArray[0]})[0];
+	}
+
+	
 	protected BufferedImage[] getAnimationImages(T cppn, int startFrame, int endFrame, boolean beingSaved) {
-		System.out.println("start:"+startFrame + ",end:"+endFrame);
+		//System.out.println("start:"+startFrame + ",end:"+endFrame);
 		return AnimationUtil.imagesFromCPPN(cppn, picSize, picSize, startFrame, endFrame, getInputMultipliers(), soundArray);
+	}
+	
+	@Override
+	public String[] sensorLabels() {
+		return new String[] { "X-coordinate", "Y-coordinate", "distance from center", "time", "Sound Amplitude", "bias" };
+	}
+	
+	@Override
+	public int numCPPNInputs() {
+		return sensorLabels().length;
+	}
+
+	@Override
+	public int numCPPNOutputs() {
+		return outputLabels().length;
 	}
 	
 	/**

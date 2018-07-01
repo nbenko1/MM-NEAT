@@ -75,7 +75,7 @@ public class ThreeDimensionalObjectBreederTask extends AnimationBreederTask<TWEA
 	double heading = (Parameters.parameters.integerParameter("defaultHeading")/(double) MAX_ROTATION) * 2 * Math.PI;
 
 	public ThreeDimensionalObjectBreederTask() throws IllegalAccessException {
-		super(false);
+		super(false, Parameters.parameters.booleanParameter("alwaysAnimate"), -1);
 		Parameters.parameters.setInteger("defaultPause", 0);
 		Parameters.parameters.setInteger("defaultAnimationLength", (int) (AnimationUtil.FRAMES_PER_SEC * 3));	
 		vertical = false;

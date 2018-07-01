@@ -43,7 +43,7 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 	protected JSlider pauseLength;
 	protected JSlider pauseLengthBetweenFrames;
 
-	protected boolean alwaysAnimate = Parameters.parameters.booleanParameter("alwaysAnimate");
+	protected boolean alwaysAnimate; // set in constructor
 
 	protected BufferedImage[] getAnimationImages(T cppn, int startFrame, int endFrame, boolean beingSaved) {
 		return AnimationUtil.imagesFromCPPN(cppn, picSize, picSize, startFrame, endFrame, getInputMultipliers());
@@ -80,7 +80,7 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 				//adds images to array at index of specified button (imageID)
 				if(animations[imageID].size() < Parameters.parameters.integerParameter("defaultAnimationLength")) {
 					int start = animations[imageID].size();
-					try {
+//					try {
 						BufferedImage[] newFrames = getAnimationImages(scores.get(imageID).individual.getPhenotype(), start, end, false);
 						for(BufferedImage bi : newFrames) {
 							if(abort) break; // stop loading if animation is aborted
@@ -92,11 +92,11 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 								animations[imageID].add(newFrames[i]);
 							}
 						}
-					} catch(IndexOutOfBoundsException e) {
-						// Suppressing this exception seems like a bad idea.
-						System.out.println("Scores not ready for animation " + imageID);
-						abort = true;
-					}
+//					} catch(IndexOutOfBoundsException e) {
+//						// Suppressing this exception seems like a bad idea.
+//						System.out.println("Scores not ready for animation " + imageID);
+//						abort = true;
+//					}
 				}
 			}
 			buttons.get(imageID).setCursor(Cursor.getDefaultCursor()); //turn off busy cursor after animations have finished loading
@@ -144,7 +144,8 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 	 * @throws IllegalAccessException
 	 */
 	public AnimationBreederTask() throws IllegalAccessException {
-		this(true);
+		// The -1 means that animation length is set in the normal way at the normal time
+		this(true, Parameters.parameters.booleanParameter("alwaysAnimate"), -1);
 	}
 
 	/**
@@ -152,8 +153,14 @@ public class AnimationBreederTask<T extends Network> extends InteractiveEvolutio
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
-	public AnimationBreederTask(boolean justAnimationBreeder) throws IllegalAccessException {
+	public AnimationBreederTask(boolean justAnimationBreeder, boolean shouldAlwaysAnimate, int overrideForAnimationLength) throws IllegalAccessException {
 		super();
+		// Override animation length (used by sound animation)
+		if(overrideForAnimationLength != -1) {
+			// In this special case, the default animation length is reset before any other processing
+			Parameters.parameters.setInteger("defaultAnimationLength", overrideForAnimationLength);
+		}
+		alwaysAnimate = Parameters.parameters.booleanParameter("alwaysAnimate");
 		animationThreads = new AnimationBreederTask.AnimationThread[Parameters.parameters.integerParameter("mu")];
 		if(justAnimationBreeder) {
 			//Construction of JSlider for desired animation length
