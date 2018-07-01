@@ -4,16 +4,21 @@ import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 
 import edu.southwestern.MMNEAT.MMNEAT;
+import edu.southwestern.evolution.genotypes.Genotype;
 import edu.southwestern.networks.Network;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.tasks.interactive.animationbreeder.AnimationBreederTask;
 import edu.southwestern.util.graphics.AnimationUtil;
+import edu.southwestern.util.sound.PlayDoubleArray;
+import edu.southwestern.util.sound.SoundFromCPPNUtil;
 import edu.southwestern.util.sound.SoundToArray;
+import edu.southwestern.util.sound.PlayDoubleArray.AmplitudeArrayPlayer;
 
 public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T> {
 
 	// Save sound amplitudes here
 	private double[] soundArray;
+	protected AmplitudeArrayPlayer arrayPlayer = null;
 	
 	public SoundAnimatorTask() throws IllegalAccessException {
 		super(false, false, soundLength());
@@ -32,16 +37,31 @@ public class SoundAnimatorTask<T extends Network> extends AnimationBreederTask<T
 		return (int) Math.min(temp.length, Parameters.parameters.integerParameter("defaultAnimationLength"));
 	}
 	
+	// Differs from AnimationTask in that the sound array is added
 	@Override
 	protected BufferedImage getButtonImage(T phenotype, int width, int height, double[] inputMultipliers) {
 		// Just get first frame for button. Slightly inefficient though, since all animation frames were pre-computed
 		return AnimationUtil.imagesFromCPPN(phenotype, picSize, picSize, 0, 1, getInputMultipliers(), new double[] {soundArray[0]})[0];
 	}
 
-	
+	// Differs from AnimationTask in that the sound array is added
+	@Override
 	protected BufferedImage[] getAnimationImages(T cppn, int startFrame, int endFrame, boolean beingSaved) {
 		//System.out.println("start:"+startFrame + ",end:"+endFrame);
 		return AnimationUtil.imagesFromCPPN(cppn, picSize, picSize, startFrame, endFrame, getInputMultipliers(), soundArray);
+	}
+
+	@Override
+	protected void additionalButtonClickAction(int scoreIndex, Genotype<T> individual) {
+		if(arrayPlayer != null) { // Always stop any currently playing sound
+			arrayPlayer.stopPlayback();
+		}
+
+		if(chosen[scoreIndex]) { // Play sound if item was just selected
+			// TODO: Should this only be the subset that is animated?
+			// TODO: Should more be done to sync the sound and the animation?
+			arrayPlayer = PlayDoubleArray.playDoubleArray(soundArray);	
+		} 
 	}
 	
 	@Override
