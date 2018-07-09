@@ -1,5 +1,6 @@
 package edu.southwestern.tasks.mspacman.agentcontroller.pacman;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import edu.southwestern.MMNEAT.MMNEAT;
@@ -57,6 +58,7 @@ public class NNHyperNEATPacManController extends NNPacManController {
 		}
 		double[] inputs = inputMediator.getInputs(gf, gf.getPacmanLastMoveMade());
 		double[] outputs = nn.process(inputs);
+		System.out.println(Arrays.toString(outputs));
 		if(pacManFullScreenOutput) {
 			int chosenNode = -1;
 			double nodePreference = Double.NEGATIVE_INFINITY;		

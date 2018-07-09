@@ -167,187 +167,187 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 		super();//constructor for noisy loner task
 		exec = Parameters.parameters.booleanParameter("partiallyObservablePacman") ?
 				new ExecutorFacade(new CustomExecutor.Builder().build()) :
-				new ExecutorFacade(new Executor());
-		this.deterministic = det;//if game is deterministic
-		tcManager = new TrainingCampManager();
+					new ExecutorFacade(new Executor());
+				this.deterministic = det;//if game is deterministic
+				tcManager = new TrainingCampManager();
 
-		//variables from command line parameters
-		onlyOneLairExitAllowed = false;
-		evolveGhosts = Parameters.parameters.booleanParameter("evolveGhosts");
-		boolean rawScorePacMan = Parameters.parameters.booleanParameter("rawScorePacMan");
-		boolean clearTimeScore = Parameters.parameters.booleanParameter("clearTimeScore");
-		boolean rewardFasterGhostEating = Parameters.parameters.booleanParameter("rewardFasterGhostEating");
-		boolean rewardFasterPillEating = Parameters.parameters.booleanParameter("rewardFasterPillEating");
-		luringTask = Parameters.parameters.booleanParameter("luringTask");
-		removePillsNearPowerPills = Parameters.parameters.booleanParameter("removePillsNearPowerPills");
-		simultaneousLairExit = Parameters.parameters.booleanParameter("simultaneousLairExit");
-		exitLairEdible = Parameters.parameters.booleanParameter("exitLairEdible");
-		endOnlyOnTimeLimit = Parameters.parameters.booleanParameter("endOnlyOnTimeLimit");
-		endAfterGhostEatingChances = Parameters.parameters.booleanParameter("endAfterGhostEatingChances");
-		noPills = Parameters.parameters.booleanParameter("noPills");
-		noPowerPills = Parameters.parameters.booleanParameter("noPowerPills");
-		ignorePillScore = Parameters.parameters.booleanParameter("ignorePillScore");
-		eachComponentTracksScoreToo = Parameters.parameters.booleanParameter("eachComponentTracksScoreToo");
-		plainGhostScore = Parameters.parameters.booleanParameter("plainGhostScore");
-		//used in constructor, not global
-		boolean avgGhostsPerPowerPill = Parameters.parameters.booleanParameter("avgGhostsPerPowerPill");
-		boolean punishDeadSpace = Parameters.parameters.booleanParameter("punishDeadSpace");
-		boolean randomSelection = Parameters.parameters.booleanParameter("randomSelection");
-		boolean partiallyObservablePacman = Parameters.parameters.booleanParameter("partiallyObservablePacman");
+				//variables from command line parameters
+				onlyOneLairExitAllowed = false;
+				evolveGhosts = Parameters.parameters.booleanParameter("evolveGhosts");
+				boolean rawScorePacMan = Parameters.parameters.booleanParameter("rawScorePacMan");
+				boolean clearTimeScore = Parameters.parameters.booleanParameter("clearTimeScore");
+				boolean rewardFasterGhostEating = Parameters.parameters.booleanParameter("rewardFasterGhostEating");
+				boolean rewardFasterPillEating = Parameters.parameters.booleanParameter("rewardFasterPillEating");
+				luringTask = Parameters.parameters.booleanParameter("luringTask");
+				removePillsNearPowerPills = Parameters.parameters.booleanParameter("removePillsNearPowerPills");
+				simultaneousLairExit = Parameters.parameters.booleanParameter("simultaneousLairExit");
+				exitLairEdible = Parameters.parameters.booleanParameter("exitLairEdible");
+				endOnlyOnTimeLimit = Parameters.parameters.booleanParameter("endOnlyOnTimeLimit");
+				endAfterGhostEatingChances = Parameters.parameters.booleanParameter("endAfterGhostEatingChances");
+				noPills = Parameters.parameters.booleanParameter("noPills");
+				noPowerPills = Parameters.parameters.booleanParameter("noPowerPills");
+				ignorePillScore = Parameters.parameters.booleanParameter("ignorePillScore");
+				eachComponentTracksScoreToo = Parameters.parameters.booleanParameter("eachComponentTracksScoreToo");
+				plainGhostScore = Parameters.parameters.booleanParameter("plainGhostScore");
+				//used in constructor, not global
+				boolean avgGhostsPerPowerPill = Parameters.parameters.booleanParameter("avgGhostsPerPowerPill");
+				boolean punishDeadSpace = Parameters.parameters.booleanParameter("punishDeadSpace");
+				boolean randomSelection = Parameters.parameters.booleanParameter("randomSelection");
+				boolean partiallyObservablePacman = Parameters.parameters.booleanParameter("partiallyObservablePacman");
 
-		objectives = new ArrayList<MsPacManObjective<T>>(17);//why 17? TODO
-		otherScores = new ArrayList<MsPacManObjective<T>>(17);//why 17? TODO
-		if (randomSelection) {//command line parameter, "Only objective is a random objective"
-			addObjective(new RandomScore<T>(), objectives, true);//random score since only objective
-		} else if (rawScorePacMan) {// "Pac-Man uses Game Score as only fitness"
-			addObjective(new GameScore<T>(), objectives, true);
-		} else if (luringTask) {//"Pac-Man rewarded for luring ghosts to power pills before eating pill"
-			addObjective(new LuringScore<T>(), objectives, true);//
-		} else if (Parameters.parameters.booleanParameter("individualLevelFitnesses")) {
-			for (int i = 0; i < Constants.NUM_MAZES; i++) {//"One fitness function for each level"
-				addObjective(new LevelGameScore<T>(i), objectives, new Average(), true);
-			}
-		} else {//more than one objective is a random objective
-			if (!noPowerPills && CommonConstants.numActiveGhosts > 0) {//power pills still present and ghosts still active
-				if (!Parameters.parameters.booleanParameter("ignoreGhostScores")) {//"No fitness from edible ghosts in Ms Pac-Man, even though there are present"
-					usedGhostScoreIndex = objectives.size();//keeps track of ghost scores since not used by agent TODO
-					if (avgGhostsPerPowerPill && !partiallyObservablePacman) {//command line parameter, "Ghost score used is the average eaten per power pill eaten"
-						addObjective(new GhostsPerPowerPillScore<T>(true), objectives, true);
-					} else if (rewardFasterGhostEating) {//command line parameter, "Ghost reward fitness gives higher fitness to eating ghosts quickly after power pills"
-						addObjective(new FastGhostEatingScore<T>(), objectives, true);
-					} else if (plainGhostScore) {//command line parameter, "For ghost fitness, just use eaten ghosts instead of ghost score"
-						addObjective(new EatenGhostScore<T>(), objectives, true);
-					} else {//otherwise, ghost fitness determined by proportional ms. pac man and ghost score 
-						addObjective(new GhostRewardScore<T>(), objectives, true);
+				objectives = new ArrayList<MsPacManObjective<T>>(17);//why 17? TODO
+				otherScores = new ArrayList<MsPacManObjective<T>>(17);//why 17? TODO
+				if (randomSelection) {//command line parameter, "Only objective is a random objective"
+					addObjective(new RandomScore<T>(), objectives, true);//random score since only objective
+				} else if (rawScorePacMan) {// "Pac-Man uses Game Score as only fitness"
+					addObjective(new GameScore<T>(), objectives, true);
+				} else if (luringTask) {//"Pac-Man rewarded for luring ghosts to power pills before eating pill"
+					addObjective(new LuringScore<T>(), objectives, true);//
+				} else if (Parameters.parameters.booleanParameter("individualLevelFitnesses")) {
+					for (int i = 0; i < Constants.NUM_MAZES; i++) {//"One fitness function for each level"
+						addObjective(new LevelGameScore<T>(i), objectives, new Average(), true);
 					}
-					//command line parameter, "Include negative fitness for ghosts that pacman fails to eat"
-					if (Parameters.parameters.booleanParameter("ghostRegretFitness") && !partiallyObservablePacman) {
-						addObjective(new GhostRegretScore<T>(), objectives, true);
-					}//command line parameter, "Fitness based on time to eat all ghosts after power pill"
-					if (Parameters.parameters.booleanParameter("timeToEatAllFitness")) {
-						addObjective(new TimeToEatAllGhostsScore<T>(), objectives, true);
+				} else {//more than one objective is a random objective
+					if (!noPowerPills && CommonConstants.numActiveGhosts > 0) {//power pills still present and ghosts still active
+						if (!Parameters.parameters.booleanParameter("ignoreGhostScores")) {//"No fitness from edible ghosts in Ms Pac-Man, even though there are present"
+							usedGhostScoreIndex = objectives.size();//keeps track of ghost scores since not used by agent TODO
+							if (avgGhostsPerPowerPill && !partiallyObservablePacman) {//command line parameter, "Ghost score used is the average eaten per power pill eaten"
+								addObjective(new GhostsPerPowerPillScore<T>(true), objectives, true);
+							} else if (rewardFasterGhostEating) {//command line parameter, "Ghost reward fitness gives higher fitness to eating ghosts quickly after power pills"
+								addObjective(new FastGhostEatingScore<T>(), objectives, true);
+							} else if (plainGhostScore) {//command line parameter, "For ghost fitness, just use eaten ghosts instead of ghost score"
+								addObjective(new EatenGhostScore<T>(), objectives, true);
+							} else {//otherwise, ghost fitness determined by proportional ms. pac man and ghost score 
+								addObjective(new GhostRewardScore<T>(), objectives, true);
+							}
+							//command line parameter, "Include negative fitness for ghosts that pacman fails to eat"
+							if (Parameters.parameters.booleanParameter("ghostRegretFitness") && !partiallyObservablePacman) {
+								addObjective(new GhostRegretScore<T>(), objectives, true);
+							}//command line parameter, "Fitness based on time to eat all ghosts after power pill"
+							if (Parameters.parameters.booleanParameter("timeToEatAllFitness")) {
+								addObjective(new TimeToEatAllGhostsScore<T>(), objectives, true);
+							}
+						}//command line parameter,  "Fitness for eating power pills when all ghosts are threats"
+						if (Parameters.parameters.booleanParameter("awardProperPowerPillEating")) {
+							addObjective(new ProperlyEatenPowerPillScore<T>(), objectives, true);
+						}
+						if (Parameters.parameters.booleanParameter("punishImproperPowerPillEating")) {
+							addObjective(new ImproperlyEatenPowerPillScore<T>(), objectives, true);
+						}
 					}
-				}//command line parameter,  "Fitness for eating power pills when all ghosts are threats"
-				if (Parameters.parameters.booleanParameter("awardProperPowerPillEating")) {
-					addObjective(new ProperlyEatenPowerPillScore<T>(), objectives, true);
+					if (!ignorePillScore && !noPills) {
+						if (rewardFasterPillEating) {
+							addObjective(new FastPillEatingScore<T>(), objectives, true);
+						} else {
+							addObjective(new PillScore<T>(), objectives, true);
+						}
+					}
 				}
-				if (Parameters.parameters.booleanParameter("punishImproperPowerPillEating")) {
-					addObjective(new ImproperlyEatenPowerPillScore<T>(), objectives, true);
+				if (Parameters.parameters.booleanParameter("rawTimeScore")) {
+					rawTimeScoreIndex = objectives.size();
+					addObjective(new RawTimeScore<T>(), objectives, true);
 				}
-			}
-			if (!ignorePillScore && !noPills) {
-				if (rewardFasterPillEating) {
-					addObjective(new FastPillEatingScore<T>(), objectives, true);
-				} else {
-					addObjective(new PillScore<T>(), objectives, true);
+				if (punishDeadSpace) {
+					addObjective(new AvoidDeadSpaceScore<T>(), objectives, true);
 				}
-			}
-		}
-		if (Parameters.parameters.booleanParameter("rawTimeScore")) {
-			rawTimeScoreIndex = objectives.size();
-			addObjective(new RawTimeScore<T>(), objectives, true);
-		}
-		if (punishDeadSpace) {
-			addObjective(new AvoidDeadSpaceScore<T>(), objectives, true);
-		}
-		if (clearTimeScore && CommonConstants.justMaze != -1) {
-			addObjective(new ClearTimeScore<T>(), objectives, true);
-		}
-		if (Parameters.parameters.booleanParameter("livesObjective")) {
-			addObjective(new RemainingLivesScore<T>(), objectives, true);
-		}
-		if (Parameters.parameters.booleanParameter("levelObjective")) {
-			addObjective(new LevelScore<T>(), objectives, true);
-		}
-		if (Parameters.parameters.booleanParameter("consistentLevelObjective")) {
-			addObjective(new LevelScore<T>(), objectives, new Mode(), true);
-		}
-		if (Parameters.parameters.booleanParameter("pacManTimeFitness")) {
-			addObjective(new SurvivalAndSpeedTimeScore<T>(), objectives, true);
-		}
-		if (Parameters.parameters.booleanParameter("pacManLureFitness")) {
-			addObjective(new LuringScore<T>(), objectives, true);
-		}
-		// Game Score
-		scoreIndexInOtherScores = otherScores.size();
-		addObjective(new GameScore<T>(), otherScores, new Average(), false);
-		maxScoreIndexInOtherScores = otherScores.size();
-		addObjective(new GameScore<T>(), otherScores, new Max(), false);
-		// Pill Score
-		pillScoreIndexInOtherScores = otherScores.size();
-		maxPillScoreIndexInOtherScores = otherScores.size();
-		// Ghost Reward
-		if(!partiallyObservablePacman) {
-			addObjective(new GhostsPerPowerPillScore<T>(true), otherScores, new Average(), false);
-			addObjective(new GhostsPerPowerPillScore<T>(false), otherScores, new Average(), false);
-			addObjective(new PillScore<T>(), otherScores, new Average(), false);
-			addObjective(new PillScore<T>(), otherScores, new Max(), false);
-		}
-		ghostRewardIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new GhostRewardScore<T>(), otherScores, new Average(), false);	
-		}
-		maxGhostRewardIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new GhostRewardScore<T>(), otherScores, new Max(), false);
-		}
-		// Level Scores
-		avgLevelIndexInOtherScores = otherScores.size();
-		addObjective(new LevelScore<T>(), otherScores, new Average(), false);
-		maxLevelIndexInOtherScores = otherScores.size();
-		addObjective(new LevelScore<T>(), otherScores, new Max(), false);
-		addObjective(new LevelScore<T>(), otherScores, new Mode(), false);
-		// Ghosts Eaten
-		ghostsEatenIndexInOtherScores = otherScores.size();
-		addObjective(new EatenGhostScore<T>(), otherScores, new Average(), false);
-		addObjective(new EatenGhostScore<T>(), otherScores, new Max(), false);
-		// Missed Ghosts
-		ghostRegretScoreInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new GhostRegretScore<T>(), otherScores, new Average(), false);
-		}
-		// Luring
-		luringScoreIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new LuringScore<T>(), otherScores, false);
-		}
-		// How/When Power Pills Are Eaten
-		properPowerPillIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new ProperlyEatenPowerPillScore<T>(), otherScores, false);
-		}
-		improperPowerPillIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {	
-			addObjective(new ImproperlyEatenPowerPillScore<T>(), otherScores, false);
-		}
-		powerPillEatenWhenGhostFarIndexInOtherScores = otherScores.size();
-		if(!partiallyObservablePacman) {
-			addObjective(new PowerPillEatenWhenGhostFarScore<T>(), otherScores, false);
-		}
-		addObjective(new SurvivalAndSpeedTimeScore<T>(), otherScores, new Average(), false);
-		addObjective(new SurvivalAndSpeedTimeScore<T>(), otherScores, new Max(), false);
+				if (clearTimeScore && CommonConstants.justMaze != -1) {
+					addObjective(new ClearTimeScore<T>(), objectives, true);
+				}
+				if (Parameters.parameters.booleanParameter("livesObjective")) {
+					addObjective(new RemainingLivesScore<T>(), objectives, true);
+				}
+				if (Parameters.parameters.booleanParameter("levelObjective")) {
+					addObjective(new LevelScore<T>(), objectives, true);
+				}
+				if (Parameters.parameters.booleanParameter("consistentLevelObjective")) {
+					addObjective(new LevelScore<T>(), objectives, new Mode(), true);
+				}
+				if (Parameters.parameters.booleanParameter("pacManTimeFitness")) {
+					addObjective(new SurvivalAndSpeedTimeScore<T>(), objectives, true);
+				}
+				if (Parameters.parameters.booleanParameter("pacManLureFitness")) {
+					addObjective(new LuringScore<T>(), objectives, true);
+				}
+				// Game Score
+				scoreIndexInOtherScores = otherScores.size();
+				addObjective(new GameScore<T>(), otherScores, new Average(), false);
+				maxScoreIndexInOtherScores = otherScores.size();
+				addObjective(new GameScore<T>(), otherScores, new Max(), false);
+				// Pill Score
+				pillScoreIndexInOtherScores = otherScores.size();
+				maxPillScoreIndexInOtherScores = otherScores.size();
+				// Ghost Reward
+				if(!partiallyObservablePacman) {
+					addObjective(new GhostsPerPowerPillScore<T>(true), otherScores, new Average(), false);
+					addObjective(new GhostsPerPowerPillScore<T>(false), otherScores, new Average(), false);
+					addObjective(new PillScore<T>(), otherScores, new Average(), false);
+					addObjective(new PillScore<T>(), otherScores, new Max(), false);
+				}
+				ghostRewardIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new GhostRewardScore<T>(), otherScores, new Average(), false);	
+				}
+				maxGhostRewardIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new GhostRewardScore<T>(), otherScores, new Max(), false);
+				}
+				// Level Scores
+				avgLevelIndexInOtherScores = otherScores.size();
+				addObjective(new LevelScore<T>(), otherScores, new Average(), false);
+				maxLevelIndexInOtherScores = otherScores.size();
+				addObjective(new LevelScore<T>(), otherScores, new Max(), false);
+				addObjective(new LevelScore<T>(), otherScores, new Mode(), false);
+				// Ghosts Eaten
+				ghostsEatenIndexInOtherScores = otherScores.size();
+				addObjective(new EatenGhostScore<T>(), otherScores, new Average(), false);
+				addObjective(new EatenGhostScore<T>(), otherScores, new Max(), false);
+				// Missed Ghosts
+				ghostRegretScoreInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new GhostRegretScore<T>(), otherScores, new Average(), false);
+				}
+				// Luring
+				luringScoreIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new LuringScore<T>(), otherScores, false);
+				}
+				// How/When Power Pills Are Eaten
+				properPowerPillIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new ProperlyEatenPowerPillScore<T>(), otherScores, false);
+				}
+				improperPowerPillIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {	
+					addObjective(new ImproperlyEatenPowerPillScore<T>(), otherScores, false);
+				}
+				powerPillEatenWhenGhostFarIndexInOtherScores = otherScores.size();
+				if(!partiallyObservablePacman) {
+					addObjective(new PowerPillEatenWhenGhostFarScore<T>(), otherScores, false);
+				}
+				addObjective(new SurvivalAndSpeedTimeScore<T>(), otherScores, new Average(), false);
+				addObjective(new SurvivalAndSpeedTimeScore<T>(), otherScores, new Max(), false);
 
-		if (MMNEAT.taskHasSubnetworks()) {
-			boolean eligibilityOnEarnedFitness = Parameters.parameters.booleanParameter("eligibilityOnEarnedFitness");
-			pillTimeFrameIndices = new int[MMNEAT.modesToTrack];
-			ghostTimeFrameIndices = new int[MMNEAT.modesToTrack];
-			for (int i = 0; i < MMNEAT.modesToTrack; i++) {
-				pillTimeFrameIndices[i] = otherScores.size();
-				addObjective(eligibilityOnEarnedFitness ? new EligibilityTimeFramesPillScore<T>(i)
-						: new TimeFramesPillScore<T>(i), otherScores, false);
-				ghostTimeFrameIndices[i] = otherScores.size();
-				addObjective(eligibilityOnEarnedFitness ? new EligibilityTimeFramesGhostScore<T>(i)
-						: new TimeFramesGhostScore<T>(i), otherScores, false);
-			}
-		}
+				if (MMNEAT.taskHasSubnetworks()) {
+					boolean eligibilityOnEarnedFitness = Parameters.parameters.booleanParameter("eligibilityOnEarnedFitness");
+					pillTimeFrameIndices = new int[MMNEAT.modesToTrack];
+					ghostTimeFrameIndices = new int[MMNEAT.modesToTrack];
+					for (int i = 0; i < MMNEAT.modesToTrack; i++) {
+						pillTimeFrameIndices[i] = otherScores.size();
+						addObjective(eligibilityOnEarnedFitness ? new EligibilityTimeFramesPillScore<T>(i)
+								: new TimeFramesPillScore<T>(i), otherScores, false);
+						ghostTimeFrameIndices[i] = otherScores.size();
+						addObjective(eligibilityOnEarnedFitness ? new EligibilityTimeFramesGhostScore<T>(i)
+								: new TimeFramesGhostScore<T>(i), otherScores, false);
+					}
+				}
 
-		specificLevelScoreFirstIndexInOtherScores = otherScores.size();
-		for (int i = 0; i < Constants.NUM_MAZES; i++) {
-			addObjective(new LevelGameScore<T>(i), otherScores, new Average(), false);
-		}
-		// Kind of a silly way to track this, but easy
-		addObjective(new EdibleTimeParameter<T>(), otherScores, new Average(), false);
-		addObjective(new LairTimeParameter<T>(), otherScores, new Average(), false);
+				specificLevelScoreFirstIndexInOtherScores = otherScores.size();
+				for (int i = 0; i < Constants.NUM_MAZES; i++) {
+					addObjective(new LevelGameScore<T>(i), otherScores, new Average(), false);
+				}
+				// Kind of a silly way to track this, but easy
+				addObjective(new EdibleTimeParameter<T>(), otherScores, new Average(), false);
+				addObjective(new LairTimeParameter<T>(), otherScores, new Average(), false);
 	}
 
 	/**
@@ -452,22 +452,22 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 					popacman.examples.StarterGhost.POGhost pinky = new popacman.examples.StarterGhost.POGhost(pacman.game.Constants.GHOST.PINKY);
 					popacman.examples.StarterGhost.POGhost inky = new popacman.examples.StarterGhost.POGhost(pacman.game.Constants.GHOST.INKY);
 					popacman.examples.StarterGhost.POGhost sue = new popacman.examples.StarterGhost.POGhost(pacman.game.Constants.GHOST.SUE);	
-					
+
 					//create an EnumMap of ghosts to controllers
 					EnumMap<pacman.game.Constants.GHOST, IndividualGhostController> map = new EnumMap<pacman.game.Constants.GHOST, IndividualGhostController>(pacman.game.Constants.GHOST.class);
-					
+
 					//put controllers in map
 					map.put(pacman.game.Constants.GHOST.BLINKY, blinky);
 					map.put(pacman.game.Constants.GHOST.PINKY, pinky);
 					map.put(pacman.game.Constants.GHOST.INKY, inky);
 					map.put(pacman.game.Constants.GHOST.SUE, sue);
-					
+
 					//create GhostControllerFacade
 					this.ghosts = new GhostControllerFacade(new MASController(map));
 				} else {
 					this.ghosts = new GhostControllerFacade((NewGhostController) ClassCreation.createObject("ghostTeam"));
 				}
-				
+
 			} catch (NoSuchMethodException ex) {
 				ex.printStackTrace();
 				System.exit(1);
@@ -490,7 +490,7 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 				NewPacManController controller = (NewPacManController) ClassCreation.createObject("staticPacMan");				
 				pacman.controllers.PacmanController poController = (pacman.controllers.PacmanController) ClassCreation.createObject("staticPacManPO");
 				//pacman.controllers.PacmanController poController = (pacman.controllers.PacmanController) ClassCreation.createObject(popacman.examples.StarterPacMan.MyPacMan.class);
-				
+
 
 				if(evolveGhosts && Parameters.parameters.booleanParameter("partiallyObservablePacman")) {
 					this.mspacman = new PacManControllerFacade(poController);
@@ -499,8 +499,8 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 					this.mspacman = Parameters.parameters.booleanParameter("partiallyObservablePacman") ?
 							//convert controller from oldpacman to popacman via OldToNewPacManInterMediaryController
 							new PacManControllerFacade(new OldToNewPacManIntermediaryController(controller)) :
-							//else use the oldpacman controller
-							new PacManControllerFacade(controller);
+								//else use the oldpacman controller
+								new PacManControllerFacade(controller);
 				}
 			} catch (NoSuchMethodException ex) {
 				ex.printStackTrace();
@@ -542,24 +542,24 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 				ghosts = new GhostControllerFacade( (NewGhostController) ((SharedNNGhosts<T>) organism).controller );
 			}
 			loadPacMan();
-		//if we are not evolving ghosts, we are evolving pacman
+			//if we are not evolving ghosts, we are evolving pacman
 		} else {
 			mspacman = Parameters.parameters.booleanParameter("partiallyObservablePacman") ?
 					//convert the controls from oldpacman controls to popacman controls
 					new PacManControllerFacade(new OldToNewPacManIntermediaryController((NewPacManController) ((NNMsPacMan<T>) organism).controller)):
-					//use oldpacman controller, don't convert to popacman
-					new PacManControllerFacade((NewPacManController) ((NNMsPacMan<T>) organism).controller);
-			loadGhosts();	
+						//use oldpacman controller, don't convert to popacman
+						new PacManControllerFacade((NewPacManController) ((NNMsPacMan<T>) organism).controller);
+					loadGhosts();	
 		}
 
 		// Side-effects to "game"
 		agentEval(mspacman, ghosts, num);
-		
+
 		if (mspacman.oldP instanceof MultinetworkMsPacManController && individual instanceof NetworkGenotype) {
 			// Track subnet selections as if they were modes
 			((NetworkGenotype<T>) individual).setModuleUsage(((MultinetworkMsPacManController) mspacman.oldP).fullUsage);
 		}
-		
+
 		double[] fitnesses = new double[this.numObjectives()];
 		double[] scores = new double[this.numOtherScores()];
 		// When evolving ghosts, all fitness scores are flipped to negative,
@@ -583,54 +583,54 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 		loadGhosts();
 		return agentEval(mspacman, this.ghosts, num);
 	}	
-	
+
 	public GameFacade agentEval(PacManControllerFacade mspacman, GhostControllerFacade ghosts, int num) {
 		tcManager.preEval();
 		game = Parameters.parameters.booleanParameter("partiallyObservablePacman") ? 
 				new GameFacade(new pacman.game.Game(deterministic ? num : RandomNumbers.randomGenerator.nextLong())) : 
-				new GameFacade(new Game(deterministic ? num : RandomNumbers.randomGenerator.nextLong()));
+					new GameFacade(new Game(deterministic ? num : RandomNumbers.randomGenerator.nextLong()));
 
-		// Collection of options that are not currently possible to set in PO PacMan
-		if(!Parameters.parameters.booleanParameter("partiallyObservablePacman")) {
-			game.setExitLairEdible(exitLairEdible);
-			game.setEndOnlyOnTimeLimit(endOnlyOnTimeLimit);
-			game.setRandomLairExit(randomLairExit);
-			game.setLairExitDatabase(lairExitDatabase);
-			game.setSimultaneousLairExit(simultaneousLairExit);
-			game.setGhostsStartOutsideLair(ghostsStartOutsideLair);
-			game.setOnlyOneLairExitAllowed(onlyOneLairExitAllowed);
-			game.setEndAfterGhostEatingChances(endAfterGhostEatingChances);
-			game.setRemovePillsNearPowerPills(removePillsNearPowerPills);
-			game.playWithoutPills(noPills);
-			game.playWithoutPowerPills(noPowerPills);
-			game.setEndAfterPowerPillsEaten(luringTask);
-		}
-		
-		int campNum = tcManager.campSetup(game, num);
-		int startingLevel = game.getCurrentLevel();
-		mspacman.reset();
-		
-		if (CommonConstants.recordPacman) {
-			exec.runGameTimedRecorded(game, mspacman, ghosts, CommonConstants.watch,
-					saveFilePrefix + Parameters.parameters.stringParameter("pacmanSaveFile"));
-			// } else if(CommonConstants.replayPacman){
-			// exec.replayGame(Parameters.parameters.stringParameter("pacmanSaveFile"),
-			// CommonConstants.watch);
-		} else if (CommonConstants.watch) {
-			// System.out.println("Watch game: " + mspacman);
-			exec.runGameTimed(mspacman, ghosts, game);
-			// exec.runGameTimed(new HumanController(new KeyBoardInput()),ghosts, true, game);
-		} else if (CommonConstants.timedPacman) {
-			exec.runGameTimedNonVisual(game, mspacman, ghosts);
-		} else {
-			exec.runExperiment(mspacman, ghosts, game);
-		}
-		tcManager.postEval(game, campNum, startingLevel);
-		if (MMNEAT.evalReport != null) {
-			mspacman.logEvaluationDetails();
-		}
+				// Collection of options that are not currently possible to set in PO PacMan
+				if(!Parameters.parameters.booleanParameter("partiallyObservablePacman")) {
+					game.setExitLairEdible(exitLairEdible);
+					game.setEndOnlyOnTimeLimit(endOnlyOnTimeLimit);
+					game.setRandomLairExit(randomLairExit);
+					game.setLairExitDatabase(lairExitDatabase);
+					game.setSimultaneousLairExit(simultaneousLairExit);
+					game.setGhostsStartOutsideLair(ghostsStartOutsideLair);
+					game.setOnlyOneLairExitAllowed(onlyOneLairExitAllowed);
+					game.setEndAfterGhostEatingChances(endAfterGhostEatingChances);
+					game.setRemovePillsNearPowerPills(removePillsNearPowerPills);
+					game.playWithoutPills(noPills);
+					game.playWithoutPowerPills(noPowerPills);
+					game.setEndAfterPowerPillsEaten(luringTask);
+				}
 
-		return game;
+				int campNum = tcManager.campSetup(game, num);
+				int startingLevel = game.getCurrentLevel();
+				mspacman.reset();
+
+				if (CommonConstants.recordPacman) {
+					exec.runGameTimedRecorded(game, mspacman, ghosts, CommonConstants.watch,
+							saveFilePrefix + Parameters.parameters.stringParameter("pacmanSaveFile"));
+					// } else if(CommonConstants.replayPacman){
+					// exec.replayGame(Parameters.parameters.stringParameter("pacmanSaveFile"),
+					// CommonConstants.watch);
+				} else if (CommonConstants.watch) {
+					// System.out.println("Watch game: " + mspacman);
+					exec.runGameTimed(mspacman, ghosts, game);
+					// exec.runGameTimed(new HumanController(new KeyBoardInput()),ghosts, true, game);
+				} else if (CommonConstants.timedPacman) {
+					exec.runGameTimedNonVisual(game, mspacman, ghosts);
+				} else {
+					exec.runExperiment(mspacman, ghosts, game);
+				}
+				tcManager.postEval(game, campNum, startingLevel);
+				if (MMNEAT.evalReport != null) {
+					mspacman.logEvaluationDetails();
+				}
+
+				return game;
 	}
 
 	@Override
@@ -692,9 +692,9 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 	 * @return
 	 */
 	public List<Substrate> getSubstrateInformationFromScratch() {
-		
+
 		int numInputSubstrates = getNumInputSubstrates();
-		
+
 		List<Triple<String,Integer,Integer>> output = new LinkedList<>();
 		if(Parameters.parameters.booleanParameter("pacManFullScreenOutput")) {
 			output.add(new Triple<>("DesiredLocation",MS_PAC_MAN_SUBSTRATE_WIDTH, MS_PAC_MAN_SUBSTRATE_HEIGHT));
@@ -704,8 +704,8 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 		List<Substrate> substrateInformation = HyperNEATUtil.getSubstrateInformation(MS_PAC_MAN_SUBSTRATE_WIDTH, MS_PAC_MAN_SUBSTRATE_HEIGHT, numInputSubstrates, output);
 		// If pills are sensed, then power pills (if sensed) are the second input substrate (index 1)
 		int powerPillSubstrateIndex = Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
-		
-		if(!Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
+
+		if(Parameters.parameters.booleanParameter("pacmanUsePowerPillInput") && !Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
 			Substrate originalPowerPillSubstrate = substrateInformation.get(powerPillSubstrateIndex); // Always the second substrate
 			Substrate powerPillSubstrate = new Substrate(new Pair<Integer, Integer>(2, 2), Substrate.INPUT_SUBSTRATE, originalPowerPillSubstrate.getSubLocation(), originalPowerPillSubstrate.getName());		
 			substrateInformation.set(powerPillSubstrateIndex, powerPillSubstrate);
@@ -739,8 +739,10 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 	private int getNumInputSubstrates() {
 		int numInputSubstrates = 0;
 		numInputSubstrates += Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
-		numInputSubstrates += 1; // one for power pills
-		numInputSubstrates += Parameters.parameters.booleanParameter("pacmanBothThreatAndEdibleSubstrate") ? 2 : 1; // 2 or 1 substrate for ghosts
+		numInputSubstrates += Parameters.parameters.booleanParameter("pacmanUsePowerPillInput") ? 1 : 0; // one for power pills
+		if(Parameters.parameters.booleanParameter("pacmanGhostInput")) {
+			numInputSubstrates += Parameters.parameters.booleanParameter("pacmanBothThreatAndEdibleSubstrate") ? 2 : 1; // 2 or 1 substrate for ghosts
+		}
 		numInputSubstrates += 1; // A substrate for Ms. Pac-Man's location
 		return numInputSubstrates;
 	}
@@ -764,7 +766,7 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 					if(sub.sourceSubstrateName.equals("Input(" + powerPillSubstrateIndex + ")")) { // Power pill substrate
 						sub.connectivityType = SubstrateConnectivity.CTYPE_FULL; // Convolution not allowed
 					}
-					
+
 				}
 			}
 		}
@@ -798,7 +800,7 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 		}
 		subs = substratesForMaze.get(mazeIndex);
 	}
-	
+
 	/**
 	 * Default behavior
 	 */

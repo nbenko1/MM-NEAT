@@ -399,6 +399,7 @@ public class Parameters {
 		booleanOptions.add("pacmanFullScreenPowerInput", false, "full screen input for power pill substrate");
 		booleanOptions.add("pacmanFullScreenProcess", false, "full screen process layer");
 		booleanOptions.add("pacmanPillInput", true, "if true pills are an of pacman");
+		booleanOptions.add("pacmanUsePowerPillInput", true, "if true ms. pacman can sense the location of powerpills");
 		booleanOptions.add("partiallyObservablePacman", false, "Whether to use the new PO Pac-Man code vs the old version");
 		booleanOptions.add("pacmanPO", false, "Whether or not popacman is subject to partially observable conditions or not");
 		booleanOptions.add("penalizeSubstrateLinks", false, "Whether to use additional fitness punishing substrate links");
@@ -596,6 +597,7 @@ public class Parameters {
 		booleanOptions.add("onlyWatchPareto", true, "When using LoadAndWatchExperiment, only watch the Pareto front");
 		booleanOptions.add("otherDirSensors", false, "Check-Each mediators include sensors that tell the current dir about other dirs");
 		booleanOptions.add("pacManGainsLives", false, "Whether or not Pac-Man can gain new lives");
+		booleanOptions.add("pacmanGhostInput", true, "if true pacman can sense ghost location");
 		booleanOptions.add("pacManLureFitness", false, "Pacman evolved using luring fitness");
 		booleanOptions.add("pacManSensorCaching", true, "Allows multiple networks to use same sensors without recalculating");
 		booleanOptions.add("pacManTimeFitness", false, "Fitness based on survival and speedy level completion");

@@ -24,16 +24,20 @@ public class MsPacManHyperNEATMediator extends BlockLoadedInputOutputMediator {
 		if(Parameters.parameters.booleanParameter("pacmanPillInput")) {
 			blocks.add(new SubstratePillsSensorBlock());
 		}
-		if(Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
-			blocks.add(new SubstrateFullScreenPowerPillSensorBlock());	
-		}else {
-			blocks.add(new SubstratePowerPillSensorBlock());
+		if(Parameters.parameters.booleanParameter("pacmanUsePowerPillInput")) {
+			if(Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
+				blocks.add(new SubstrateFullScreenPowerPillSensorBlock());	
+			}else {
+				blocks.add(new SubstratePowerPillSensorBlock());
+			}
 		}
-		if(Parameters.parameters.booleanParameter("pacmanBothThreatAndEdibleSubstrate")) {
-			blocks.add(new SubstrateThreatSensorBlock());
-			blocks.add(new SubstrateEdibleSensorBlock());
-		} else {
-			blocks.add(new SubstrateGhostSensorBlock());
+		if(Parameters.parameters.booleanParameter("pacmanGhostInput")) {
+			if(Parameters.parameters.booleanParameter("pacmanBothThreatAndEdibleSubstrate")) {
+				blocks.add(new SubstrateThreatSensorBlock());
+				blocks.add(new SubstrateEdibleSensorBlock());
+			} else {
+				blocks.add(new SubstrateGhostSensorBlock());
+			}
 		}
 		blocks.add(new SubstratePacManSensorBlock());
 	}
