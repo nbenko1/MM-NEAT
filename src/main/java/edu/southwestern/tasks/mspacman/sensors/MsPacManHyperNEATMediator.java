@@ -21,7 +21,9 @@ public class MsPacManHyperNEATMediator extends BlockLoadedInputOutputMediator {
 	 *  necessary sensor blocks together
 	 */
 	public MsPacManHyperNEATMediator() {
-		blocks.add(new SubstratePillsSensorBlock());
+		if(Parameters.parameters.booleanParameter("pacmanPillInput")) {
+			blocks.add(new SubstratePillsSensorBlock());
+		}
 		if(Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
 			blocks.add(new SubstrateFullScreenPowerPillSensorBlock());	
 		}else {

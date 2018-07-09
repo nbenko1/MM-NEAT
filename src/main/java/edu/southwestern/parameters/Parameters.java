@@ -398,6 +398,7 @@ public class Parameters {
 		booleanOptions.add("pacmanBothThreatAndEdibleSubstrate", false, "whether or not to have 2 substrates for threat and edible ghosts");
 		booleanOptions.add("pacmanFullScreenPowerInput", false, "full screen input for power pill substrate");
 		booleanOptions.add("pacmanFullScreenProcess", false, "full screen process layer");
+		booleanOptions.add("pacmanPillInput", true, "if true pills are an of pacman");
 		booleanOptions.add("partiallyObservablePacman", false, "Whether to use the new PO Pac-Man code vs the old version");
 		booleanOptions.add("pacmanPO", false, "Whether or not popacman is subject to partially observable conditions or not");
 		booleanOptions.add("penalizeSubstrateLinks", false, "Whether to use additional fitness punishing substrate links");

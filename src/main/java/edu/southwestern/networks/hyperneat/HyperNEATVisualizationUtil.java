@@ -137,24 +137,6 @@ public class HyperNEATVisualizationUtil {
 		}
 	}
 
-
-	/**
-	 * Turn off all HyperNEAT visualization.
-	 * Used when hybrID switches over.
-	 */
-	//	public static void clearHyperNEATVisualizations() {
-	//		if(substratePanels != null) {
-	//			for(DrawingPanel dp: substratePanels) {
-	//				dp.dispose();
-	//			}
-	//		}
-	//		if(weightPanels != null) {
-	//			for(DrawingPanel dp: weightPanels) {
-	//				dp.dispose();
-	//			}
-	//		}
-	//	}
-
 	/**
 	 * Draws the Substrates of the HyperNEAT
 	 * 

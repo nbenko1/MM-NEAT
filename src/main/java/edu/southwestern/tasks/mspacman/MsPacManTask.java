@@ -76,7 +76,6 @@ import oldpacman.game.Constants;
 import oldpacman.game.Game;
 import pacman.controllers.IndividualGhostController;
 import pacman.controllers.MASController;
-import pacman.game.Constants.GHOST;
 import popacman.CustomExecutor;
 
 
@@ -97,8 +96,6 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 	public static final int MS_PAC_MAN_SUBSTRATE_WIDTH = MS_PAC_MAN_NODE_WIDTH/MS_PAC_MAN_NODE_DIM;
 	public static final int MS_PAC_MAN_SUBSTRATE_HEIGHT = MS_PAC_MAN_NODE_HEIGHT/MS_PAC_MAN_NODE_DIM;
 	public static final int MS_PAC_MAN_SUBSTRATE_SIZE = MS_PAC_MAN_SUBSTRATE_WIDTH * MS_PAC_MAN_SUBSTRATE_HEIGHT;
-	// Substrate index that deals with power pills
-	public static final int POWER_PILL_SUBSTRATE_INDEX = 1; 
 	public List<Substrate> subs = null; // filled below
 	public List<SubstrateConnectivity> connections = null; // filled below
 	public HashMap<Integer, List<Substrate>> substratesForMaze = new HashMap<Integer, List<Substrate>>();
@@ -705,11 +702,13 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 			output.add(new Triple<>("Direction",3,3));
 		}
 		List<Substrate> substrateInformation = HyperNEATUtil.getSubstrateInformation(MS_PAC_MAN_SUBSTRATE_WIDTH, MS_PAC_MAN_SUBSTRATE_HEIGHT, numInputSubstrates, output);
-		// Will always be the second substrate: compact representation may replace full screen version
+		// If pills are sensed, then power pills (if sensed) are the second input substrate (index 1)
+		int powerPillSubstrateIndex = Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
+		
 		if(!Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
-			Substrate originalPowerPillSubstrate = substrateInformation.get(POWER_PILL_SUBSTRATE_INDEX); // Always the second substrate
+			Substrate originalPowerPillSubstrate = substrateInformation.get(powerPillSubstrateIndex); // Always the second substrate
 			Substrate powerPillSubstrate = new Substrate(new Pair<Integer, Integer>(2, 2), Substrate.INPUT_SUBSTRATE, originalPowerPillSubstrate.getSubLocation(), originalPowerPillSubstrate.getName());		
-			substrateInformation.set(POWER_PILL_SUBSTRATE_INDEX, powerPillSubstrate);
+			substrateInformation.set(powerPillSubstrateIndex, powerPillSubstrate);
 		}
 
 		// Provide a way to resize the processing substrates		
@@ -739,7 +738,8 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 
 	private int getNumInputSubstrates() {
 		int numInputSubstrates = 0;
-		numInputSubstrates += 2; // One for regular pills, and one for power pills
+		numInputSubstrates += Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
+		numInputSubstrates += 1; // one for power pills
 		numInputSubstrates += Parameters.parameters.booleanParameter("pacmanBothThreatAndEdibleSubstrate") ? 2 : 1; // 2 or 1 substrate for ghosts
 		numInputSubstrates += 1; // A substrate for Ms. Pac-Man's location
 		return numInputSubstrates;
@@ -757,8 +757,11 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 			connections = HyperNEATUtil.getSubstrateConnectivity(getNumInputSubstrates(), outputNames);			
 			// The four input power pill substrate does not contain visual information
 			if(!Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
+				// If pills are sensed, then power pills (if sensed) are the second input substrate (index 1)
+				int powerPillSubstrateIndex = Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
+
 				for(SubstrateConnectivity sub : connections) { // So do not allow convolution
-					if(sub.sourceSubstrateName.equals("Input(" + POWER_PILL_SUBSTRATE_INDEX + ")")) { // Power pill substrate
+					if(sub.sourceSubstrateName.equals("Input(" + powerPillSubstrateIndex + ")")) { // Power pill substrate
 						sub.connectivityType = SubstrateConnectivity.CTYPE_FULL; // Convolution not allowed
 					}
 					
