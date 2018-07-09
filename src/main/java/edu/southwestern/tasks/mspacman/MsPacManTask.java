@@ -706,7 +706,7 @@ public class MsPacManTask<T extends Network> extends NoisyLonerTask<T>implements
 		int powerPillSubstrateIndex = Parameters.parameters.booleanParameter("pacmanPillInput") ? 1 : 0;
 
 		if(Parameters.parameters.booleanParameter("pacmanUsePowerPillInput") && !Parameters.parameters.booleanParameter("pacmanFullScreenPowerInput")) {
-			Substrate originalPowerPillSubstrate = substrateInformation.get(powerPillSubstrateIndex); // Always the second substrate
+			Substrate originalPowerPillSubstrate = substrateInformation.get(powerPillSubstrateIndex);
 			Substrate powerPillSubstrate = new Substrate(new Pair<Integer, Integer>(2, 2), Substrate.INPUT_SUBSTRATE, originalPowerPillSubstrate.getSubLocation(), originalPowerPillSubstrate.getName());		
 			substrateInformation.set(powerPillSubstrateIndex, powerPillSubstrate);
 		}
