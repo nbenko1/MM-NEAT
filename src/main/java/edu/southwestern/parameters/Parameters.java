@@ -509,9 +509,10 @@ public class Parameters {
 		booleanOptions.add("ignoreGhostScores", false, "No fitness from edible ghosts in Ms Pac-Man, even though there are present");
 		booleanOptions.add("ignorePillScore", false, "PacMan does not have pill fitness");
 		booleanOptions.add("imprisonedWhileEdible", false, "Ghosts cannot exit the lair as long as any ghost is edible");
-		booleanOptions.add("includeAbsValFunction", true, "Fuction for absolute value. If true, add to the function set");
-		booleanOptions.add("includeApproxFunction", false, "Fuction for quick sigmoid. If true, add to the function set");
-		booleanOptions.add("includeCosineFunction", false, "Fuction for cosine. If true, add to the function set");
+		booleanOptions.add("includeAbsValFunction", true, "Function for absolute value. If true, add to the function set");
+		booleanOptions.add("includeApproxFunction", false, "Function for quick sigmoid. If true, add to the function set");
+		booleanOptions.add("includeBinaryStepFunction", false, "Function for binary step. If true, add to the function set");
+		booleanOptions.add("includeCosineFunction", false, "Function for cosine. If true, add to the function set");
 		booleanOptions.add("includeDSiLFunction", false, "Function for derivative of sigmoid weighted linear unit function. If true, add to the function set");
 		booleanOptions.add("includeFullApproxFunction", false, "Fuction for full quick sigmoid. If true, add to the function set");
 		booleanOptions.add("includeFullGaussFunction", false, "Fuction for full gaussian. If true, add to the function set");

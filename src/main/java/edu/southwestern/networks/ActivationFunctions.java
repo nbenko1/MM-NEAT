@@ -53,7 +53,9 @@ public class ActivationFunctions {
 	public static final int FTYPE_COS = 26;
 	public static final int FTYPE_SIL = 27;
 	public static final int FTYPE_DSIL = 28;
+	public static final int FTYPE_BINARYSTEP = 28;
 
+	
 	private static HashMap<Integer,ActivationFunction> functionMap;
 	
 	// When loaded, fill HashMap with instances of each function
@@ -82,6 +84,7 @@ public class ActivationFunctions {
 		functionMap.put(FTYPE_COS, new CosineFunction());
 		functionMap.put(FTYPE_SIL, new SiLFunction());
 		functionMap.put(FTYPE_DSIL, new DSiLFunction());
+		functionMap.put(FTYPE_BINARYSTEP, new BinaryStepFunction());
 	}
 	
 	/**
@@ -170,7 +173,9 @@ public class ActivationFunctions {
 		if (Parameters.parameters.booleanParameter("includeDSiLFunction")) {
 			availableActivationFunctions.add(FTYPE_DSIL);
 		}
-		
+		if (Parameters.parameters.booleanParameter("includeBinaryStepFunction")) {
+			availableActivationFunctions.add(FTYPE_BINARYSTEP);
+		}
 	}
 
 	/**
