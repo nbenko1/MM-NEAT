@@ -58,7 +58,6 @@ public class NNHyperNEATPacManController extends NNPacManController {
 		}
 		double[] inputs = inputMediator.getInputs(gf, gf.getPacmanLastMoveMade());
 		double[] outputs = nn.process(inputs);
-		System.out.println(Arrays.toString(outputs));
 		if(pacManFullScreenOutput) {
 			int chosenNode = -1;
 			double nodePreference = Double.NEGATIVE_INFINITY;		

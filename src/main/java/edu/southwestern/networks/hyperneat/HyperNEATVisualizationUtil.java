@@ -213,7 +213,7 @@ public class HyperNEATVisualizationUtil {
 	/**
 	 * Draws squares representing a coordinate location from substrate
 	 * @param p drawing panel
-	 * @param size size of substrate
+	 * @param substrateSize size of substrate
 	 * @param c color of square
 	 */
 	private static void drawCoord(DrawingPanel p, Substrate substrate, ArrayList<Node> nodes, int nodeIndex) {
