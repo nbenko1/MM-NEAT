@@ -9,6 +9,8 @@ import edu.southwestern.util.datastructures.Pair;
  * One pacman eval consists of two separate evals: One in the regular game, and
  * one in the ghost eating scenario.
  *
+ * TODO: Is this class actually used? It does not extend MsPacManIsolatedMultitask, but has task1Prep, etc. Suspicious ...
+ *
  * @author Jacob Schrum
  * @param <T>
  */
