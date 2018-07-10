@@ -6,6 +6,7 @@ import java.util.List;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.evolution.genotypes.Genotype;
 import edu.southwestern.evolution.genotypes.HyperNEATCPPNAndSubstrateArchitectureGenotype;
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 import edu.southwestern.parameters.Parameters;
@@ -31,17 +32,17 @@ public class CascadeNetworks {
 	 * @param connectionType how these two substrates are connected(i.e. full, convolutional,...)
 	 * @return a deep copy of the previous architecture and connectivity with the new layer added
 	 */
-	public static Pair<List<Triple<Integer, Integer, Integer>>, List<SubstrateConnectivity>> cascadeExpansion (
-			List<Triple<Integer, Integer, Integer>> originalHiddenArchitecture,
+	public static Pair<List<HiddenSubstrateGroup>, List<SubstrateConnectivity>> cascadeExpansion (
+			List<HiddenSubstrateGroup> originalHiddenArchitecture,
 			List<SubstrateConnectivity> originalConnectivity,
 			List<String> outputSubstrateNames,
 			int newLayerWidth, int newSubstratesWidth, int newsubstratesHeight, int connectivityType) {
 		//create new hidden architecture
-		List<Triple<Integer, Integer, Integer>> newArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
-		for(Triple<Integer, Integer, Integer> layer : originalHiddenArchitecture) {
-			newArchitecture.add(layer.copy());
+		List<HiddenSubstrateGroup> newArchitecture = new ArrayList<HiddenSubstrateGroup>();
+		for(HiddenSubstrateGroup group : originalHiddenArchitecture) {
+			newArchitecture.add(group.copy());
 		}
-		newArchitecture.add(new Triple<Integer, Integer, Integer>(newLayerWidth, newSubstratesWidth, newsubstratesHeight));
+		newArchitecture.add(new HiddenSubstrateGroup(new Pair<Integer, Integer>(newSubstratesWidth, newsubstratesHeight), newLayerWidth, newArchitecture.size()));
 		//create new hidden architecture end
 		//create new connectivity
 		List<SubstrateConnectivity> newConnectivity = new ArrayList<SubstrateConnectivity>();
@@ -50,11 +51,13 @@ public class CascadeNetworks {
 		}
 		//connect new layer to last hidden layer
 		int lastHiddenLayerLocation = originalHiddenArchitecture.size() - 1; //y location of last hidden layer and location of last hidden layer in originalHiddenArchitecture
-		for(int i = 0; i < originalHiddenArchitecture.get(lastHiddenLayerLocation).t1; i++) { //originalHiddenArchitecture.get(lastHiddenLayerLocation).t1 = the width of the last hidden layer
+		HiddenSubstrateGroup lastHiddenLayer = originalHiddenArchitecture.get(lastHiddenLayerLocation);
+		for(int i = 0; i < lastHiddenLayer.numSubstrates; i++) { //originalHiddenArchitecture.get(lastHiddenLayerLocation).t1 = the width of the last hidden layer
+			Triple<Integer, Integer, Integer> lastHiddenLayerStartLocation = lastHiddenLayer.hiddenSubstrateGroupStartLocation;
 			for(int j = 0; j < newLayerWidth; j++) {
 				newConnectivity.add(new SubstrateConnectivity(
-						"process(" + i + "," + lastHiddenLayerLocation + ")", 
-						"process(" + j + "," + (lastHiddenLayerLocation + 1) + ")", connectivityType));
+						"process(" + (lastHiddenLayerStartLocation.t1 + i) + "," + lastHiddenLayerStartLocation.t2 + ")", 
+						"process(" + j + "," + (lastHiddenLayerStartLocation.t2 + 1) + ")", connectivityType));
 			}
 		}
 		//connect new layer to last hidden layer end
@@ -68,7 +71,7 @@ public class CascadeNetworks {
 		}
 		//connect new layer to output layer end
 		//create new connectivity end
-		return new Pair<List<Triple<Integer, Integer, Integer>>, List<SubstrateConnectivity>>(newArchitecture, newConnectivity);
+		return new Pair<List<HiddenSubstrateGroup>, List<SubstrateConnectivity>>(newArchitecture, newConnectivity);
 	}
 	
 	/**
@@ -83,14 +86,15 @@ public class CascadeNetworks {
 	 * @param newLayerWidth the width(the number of substrates) of the new layer
 	 * @return a deep copy of the previous architecture and connectivity with the new layer added
 	 */
-	public static Pair<List<Triple<Integer, Integer, Integer>>, List<SubstrateConnectivity>> cascadeExpansion (
-			List<Triple<Integer, Integer, Integer>> originalHiddenArchitecture,
+	public static Pair<List<HiddenSubstrateGroup>, List<SubstrateConnectivity>> cascadeExpansion (
+			List<HiddenSubstrateGroup> originalHiddenArchitecture,
 			List<SubstrateConnectivity> originalConnectivity,
 			List<String> outputSubstrateNames,
 			int newLayerWidth) {
-		Triple<Integer, Integer, Integer> lastHiddenLayer = originalHiddenArchitecture.get(originalHiddenArchitecture.size() - 1);
+		HiddenSubstrateGroup lastHiddenLayer = originalHiddenArchitecture.get(originalHiddenArchitecture.size() - 1);
+		Pair<Integer, Integer> lastHiddenLayerSize = lastHiddenLayer.substrateSize;
 		return cascadeExpansion (originalHiddenArchitecture, originalConnectivity, outputSubstrateNames, newLayerWidth,
-				lastHiddenLayer.t2,  lastHiddenLayer.t3, SubstrateConnectivity.CTYPE_FULL);
+				lastHiddenLayerSize.t1,  lastHiddenLayerSize.t2, SubstrateConnectivity.CTYPE_FULL);
 	}
 
 	/**
@@ -102,14 +106,14 @@ public class CascadeNetworks {
 	 */
 	public static <T> ArrayList<Genotype<T>> cascadeExpandAllGenotypes(ArrayList<Genotype<T>> population) {
 		assert population.get(0) instanceof HyperNEATCPPNAndSubstrateArchitectureGenotype;
-		List<Triple<Integer,Integer,Integer>> exemplarNetworksHiddenArchitecture = ((HyperNEATCPPNAndSubstrateArchitectureGenotype) population.get(0)).hiddenArchitecture;
-		Triple<Integer, Integer, Integer> lastLayerInExemplar = exemplarNetworksHiddenArchitecture.get(exemplarNetworksHiddenArchitecture.size() - 1);
+		List<HiddenSubstrateGroup> exemplarNetworksHiddenArchitecture = ((HyperNEATCPPNAndSubstrateArchitectureGenotype) population.get(0)).hiddenArchitecture;
+		HiddenSubstrateGroup lastLayerInExemplar = exemplarNetworksHiddenArchitecture.get(exemplarNetworksHiddenArchitecture.size() - 1);
 		int receptiveFieldHeight = Parameters.parameters.integerParameter("receptiveFieldHeight");
 		int receptiveFieldWidth = Parameters.parameters.integerParameter("receptiveFieldWidth");
 		//newSubstrateWidth is defined by the previous layer and the truncated receptiveFieldWidth
-		int newSubstrateWidth = lastLayerInExemplar.t2 - (2 * (receptiveFieldWidth / 2));
+		int newSubstrateWidth = lastLayerInExemplar.substrateSize.t1 - (2 * (receptiveFieldWidth / 2));
 		//newSubstrateHeight is defined by the previous layer and the truncated receptiveFieldHeight
-		int newSubstrateHeight = lastLayerInExemplar.t3 - (2 * (receptiveFieldHeight / 2));
+		int newSubstrateHeight = lastLayerInExemplar.substrateSize.t2 - (2 * (receptiveFieldHeight / 2));
 		if (newSubstrateWidth > 0 && newSubstrateHeight > 0) {			
 			return cascadeExpandAllGenotypes(population, 1, newSubstrateWidth, newSubstrateHeight, SubstrateConnectivity.CTYPE_CONVOLUTION);
 		} else {

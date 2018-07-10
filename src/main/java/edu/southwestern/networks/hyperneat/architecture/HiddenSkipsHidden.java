@@ -3,10 +3,10 @@ package edu.southwestern.networks.hyperneat.architecture;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 import edu.southwestern.util.datastructures.Pair;
-import edu.southwestern.util.datastructures.Triple;
 
 /**
  * Architecture that contains 2 hidden layers each with 1 substrate. The first substrate is connected to the output as well as the second hidden layer.
@@ -20,10 +20,10 @@ public class HiddenSkipsHidden implements SubstrateArchitectureDefinition{
 	 * TODO
 	 */
 	@Override
-	public List<Triple<Integer, Integer, Integer>> getNetworkHiddenArchitecture() {
-		List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
-		networkHiddenArchitecture.add(new Triple<Integer, Integer, Integer>(1, 10, 20));
-		networkHiddenArchitecture.add(new Triple<Integer, Integer, Integer>(1, 10, 20));
+	public List<HiddenSubstrateGroup> getNetworkHiddenArchitecture() {
+		List<HiddenSubstrateGroup> networkHiddenArchitecture = new ArrayList<HiddenSubstrateGroup>();
+		networkHiddenArchitecture.add(new HiddenSubstrateGroup(1, 10, 20, 0));
+		networkHiddenArchitecture.add(new HiddenSubstrateGroup(1, 10, 20, 1));
 		return networkHiddenArchitecture;
 	}
 

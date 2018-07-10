@@ -3,10 +3,10 @@ package edu.southwestern.networks.hyperneat.architecture;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 import edu.southwestern.util.datastructures.Pair;
-import edu.southwestern.util.datastructures.Triple;
 
 /**
  * Input connected to 1 first hidden substrate with 3x3 convolutional. First hidden connected to a 1x10 second hidden with full. 
@@ -16,11 +16,11 @@ import edu.southwestern.util.datastructures.Triple;
 public class SkinnySubstrates1x101x5 implements SubstrateArchitectureDefinition{
 
 	@Override
-	public List<Triple<Integer, Integer, Integer>> getNetworkHiddenArchitecture() {
-		List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
-		networkHiddenArchitecture.add(new Triple<Integer, Integer, Integer>(1, 8, 18));
-		networkHiddenArchitecture.add(new Triple<Integer, Integer, Integer>(1, 10, 1));
-		networkHiddenArchitecture.add(new Triple<Integer, Integer, Integer>(1, 5, 1));
+	public List<HiddenSubstrateGroup> getNetworkHiddenArchitecture() {
+		List<HiddenSubstrateGroup> networkHiddenArchitecture = new ArrayList<HiddenSubstrateGroup>();
+		networkHiddenArchitecture.add(new HiddenSubstrateGroup(1, 8, 18, 0));
+		networkHiddenArchitecture.add(new HiddenSubstrateGroup(1, 10, 1, 1));
+		networkHiddenArchitecture.add(new HiddenSubstrateGroup(1, 5, 1, 2));
 		return networkHiddenArchitecture;
 	}
 
@@ -28,9 +28,9 @@ public class SkinnySubstrates1x101x5 implements SubstrateArchitectureDefinition{
 	public List<SubstrateConnectivity> getSubstrateConnectivity(HyperNEATTask hnt) {
 		List<SubstrateConnectivity> substrateConnectivity = new ArrayList<SubstrateConnectivity>();
 		Pair<List<String>, List<String>> io = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt);
-		List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture = getNetworkHiddenArchitecture();
+		List<HiddenSubstrateGroup> networkHiddenArchitecture = getNetworkHiddenArchitecture();
 		FlexibleSubstrateArchitecture.connectInputToFirstHidden(substrateConnectivity, io.t1, networkHiddenArchitecture, 3, 3);
-		FlexibleSubstrateArchitecture.connectAllAdjacentHiddenLayers(substrateConnectivity, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_FULL);
+		FlexibleSubstrateArchitecture.linearlyConnectAllGroups(substrateConnectivity, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_FULL);
 		FlexibleSubstrateArchitecture.connectLastHiddenToOutput(substrateConnectivity, io.t2, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_FULL);
 		return substrateConnectivity;
 	}

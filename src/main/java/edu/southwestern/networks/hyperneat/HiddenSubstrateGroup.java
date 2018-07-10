@@ -2,23 +2,51 @@ package edu.southwestern.networks.hyperneat;
 
 
 import edu.southwestern.util.datastructures.Pair;
+import edu.southwestern.util.datastructures.Triple;
 public class HiddenSubstrateGroup {
-	public final static int INPUT_SUBSTRATE = 0;
-	public final static int PROCCESS_SUBSTRATE = 1;
-	public final static int OUTPUT_SUBSTRATE = 2;
 	// Default activation function is whatever the Parameter setting is
 	public static final int DEFAULT_ACTIVATION_FUNCTION = -1;
-	Pair<Integer, Integer> substrateSize;
-	int numSubstrates;
+	//(width,height)
+	public Pair<Integer, Integer> substrateSize;
+	public int numSubstrates;
+	//the location in 3d vector space of the first substrate in this HiddenSubstrateGroup
+	public Triple<Integer, Integer, Integer> hiddenSubstrateGroupStartLocation;
 	int fType;
-
-	public HiddenSubstrateGroup(Pair<Integer, Integer> size, int numSubstrates,  int fType) {
-		this(size, numSubstrates, fType, null);
+	
+	public HiddenSubstrateGroup(int numSubstrates, int substrateWidth, int substrateHeight, int layerDepth) {
+		Pair<Integer, Integer> size = new Pair<Integer, Integer>(substrateWidth, substrateHeight);
+		this.substrateSize = size;
+		this.numSubstrates = numSubstrates;
+		this.hiddenSubstrateGroupStartLocation = new Triple<Integer, Integer, Integer>(0, layerDepth, 0);
 	}
 	
-	public HiddenSubstrateGroup(Pair<Integer, Integer> substrateSize, int numSubstrates, int fType, HiddenSubstrateGroup neighbor) {
-		this.substrateSize = substrateSize;
+	public HiddenSubstrateGroup(Pair<Integer, Integer> size, int numSubstrates, int layerDepth) {
+		this(size, numSubstrates, layerDepth, DEFAULT_ACTIVATION_FUNCTION);
+	}
+
+	public HiddenSubstrateGroup(Pair<Integer, Integer> size, int numSubstrates, int layerDepth, int fType) {
+		this(size, numSubstrates, layerDepth, fType, null);
+	}
+	
+	public HiddenSubstrateGroup(Pair<Integer, Integer> size, int numSubstrates, Triple<Integer, Integer, Integer> hiddenSubstrateGroupStartLocation, int fType) {
+		this.substrateSize = size;
 		this.numSubstrates = numSubstrates;
+		this.hiddenSubstrateGroupStartLocation = hiddenSubstrateGroupStartLocation;
 		this.fType = fType;
+	}
+
+	public HiddenSubstrateGroup(Pair<Integer, Integer> size, int numSubstrates, int layerDepth, int fType, HiddenSubstrateGroup leftNeighbor) {
+		this.substrateSize = size;
+		this.numSubstrates = numSubstrates;
+		if (leftNeighbor != null) {
+			hiddenSubstrateGroupStartLocation = new Triple<Integer, Integer, Integer>(leftNeighbor.hiddenSubstrateGroupStartLocation.t1 + leftNeighbor.numSubstrates, layerDepth, 0);
+		} else {
+			hiddenSubstrateGroupStartLocation = new Triple<Integer, Integer, Integer>(0, layerDepth, 0);
+		}
+		this.fType = fType;
+	}
+
+	public HiddenSubstrateGroup copy() {
+		return new HiddenSubstrateGroup(this.substrateSize, this.numSubstrates, this.hiddenSubstrateGroupStartLocation, this.fType);
 	}
 }

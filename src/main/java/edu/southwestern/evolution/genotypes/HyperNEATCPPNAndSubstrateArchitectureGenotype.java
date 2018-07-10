@@ -8,6 +8,7 @@ import java.util.List;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.networks.ActivationFunctions;
 import edu.southwestern.networks.TWEANN;
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.HyperNEATUtil;
 import edu.southwestern.networks.hyperneat.Substrate;
@@ -27,7 +28,7 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 	// Describes the sequence of hidden layers. The input and output layers are still provided by the HyperNEATTask.
 	// List of triples that specifies each substrate with the index of each triple being its layer.
 	// Each triple looks like (width of layer, width of substrate, height of substrate)
-	public List<Triple<Integer, Integer, Integer>> hiddenArchitecture;
+	public List<HiddenSubstrateGroup> hiddenArchitecture;
 	// Describes connectivity between ALL substrates, including the input and output substrates
 	// list of triples that specifies connectivity of network.
 	// Looks like (source substrate, target substrate, connectivityType)
@@ -54,7 +55,7 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 	 * 		Each triple looks like (width of layer, width of substrate, height of substrate)
 	 * @param allSubstrateConnectivity how each substrate is connected
 	 */
-	public HyperNEATCPPNAndSubstrateArchitectureGenotype(List<Triple<Integer, Integer, Integer>> hiddenArchitecture, List<SubstrateConnectivity> allSubstrateConnectivity) {
+	public HyperNEATCPPNAndSubstrateArchitectureGenotype(List<HiddenSubstrateGroup> hiddenArchitecture, List<SubstrateConnectivity> allSubstrateConnectivity) {
 		super();
 		this.hiddenArchitecture = hiddenArchitecture;
 		this.allSubstrateConnectivity = allSubstrateConnectivity;
@@ -111,7 +112,7 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 	 * @param allSubstrateConnectivity how each substrate is connected
 	 */
 	private HyperNEATCPPNAndSubstrateArchitectureGenotype(int archetypeIndex, ArrayList<LinkGene> links, ArrayList<NodeGene> genes, int outputNeurons,
-			List<Triple<Integer, Integer, Integer>> hiddenArchitecture, List<SubstrateConnectivity> allSubstrateConnectivity) {
+			List<HiddenSubstrateGroup> hiddenArchitecture, List<SubstrateConnectivity> allSubstrateConnectivity) {
 		super(archetypeIndex, links, genes, outputNeurons);
 		this.allSubstrateConnectivity = allSubstrateConnectivity;
 		assert allSubstrateConnectivity.get(0).sourceSubstrateName != null : "How was a null name constructed?";
@@ -146,10 +147,10 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 		//substrate hidden layer information
 		int numLayers = hiddenArchitecture.size();
 		for (int i = 0; i < numLayers; i++) {
-			Triple<Integer, Integer, Integer> currentLayer = hiddenArchitecture.get(i);
-			for (int j = 0; j < hiddenArchitecture.get(i).t1; j++) {
+			HiddenSubstrateGroup currentGroup = hiddenArchitecture.get(i);
+			for (int j = 0; j < hiddenArchitecture.get(i).numSubstrates; j++) {
 				newSubstrateInformation.add(new Substrate(
-						new Pair<>(currentLayer.t2, currentLayer.t3), Substrate.PROCCESS_SUBSTRATE, 
+						currentGroup.substrateSize, Substrate.PROCCESS_SUBSTRATE, 
 						new Triple<Integer, Integer, Integer> (j , i + 1, 0),
 						"process(" + j + "," + i + ")"));
 			}
@@ -197,7 +198,7 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 			int numOutputsInPhenotype = FlexibleSubstrateArchitecture.getInputAndOutputNames(((HyperNEATTask) MMNEAT.task)).t2.size();
 			addMSSNeuronsToCPPN(allSubstrateConnectivity.size(), hiddenArchitecture.size(), numOutputsInPhenotype, newLayerWidth, ftypes);
 		}
-		Pair<List<Triple<Integer, Integer, Integer>>, List<SubstrateConnectivity>> newDefiniton = 
+		Pair<List<HiddenSubstrateGroup>, List<SubstrateConnectivity>> newDefiniton = 
 				CascadeNetworks.cascadeExpansion(this.hiddenArchitecture, this.allSubstrateConnectivity, 
 				FlexibleSubstrateArchitecture.getInputAndOutputNames((HyperNEATTask) MMNEAT.task).t2,
 				newLayerWidth, newSubstratesWidth, newSubstratesHeight, connectivityType);
@@ -215,8 +216,8 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotype extends HyperNEATCPPN
 		int[] temp = moduleUsage;
 		
 		// Copy the architecture
-		List<Triple<Integer, Integer, Integer>> copyHiddenArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
-		for(Triple<Integer, Integer, Integer> layer: this.hiddenArchitecture) {
+		List<HiddenSubstrateGroup> copyHiddenArchitecture = new ArrayList<HiddenSubstrateGroup>();
+		for(HiddenSubstrateGroup layer: this.hiddenArchitecture) {
 			copyHiddenArchitecture.add(layer.copy());
 		}
 		List<SubstrateConnectivity> copyAllSubstrateConnectivity = new ArrayList<SubstrateConnectivity>();

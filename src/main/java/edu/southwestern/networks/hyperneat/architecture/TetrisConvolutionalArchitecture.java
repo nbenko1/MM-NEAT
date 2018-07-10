@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.southwestern.util.datastructures.Pair;
-import edu.southwestern.util.datastructures.Triple;
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 
@@ -20,15 +20,15 @@ public class TetrisConvolutionalArchitecture implements SubstrateArchitectureDef
 	 * 		Each triple looks like (width of layer, width of substrate, height of substrate)
 	 */
 	@Override
-	public List<Triple<Integer, Integer, Integer>> getNetworkHiddenArchitecture() {
-		List<Triple<Integer, Integer, Integer>> tetrisConvolutionalArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
+	public List<HiddenSubstrateGroup> getNetworkHiddenArchitecture() {
+		List<HiddenSubstrateGroup> tetrisConvolutionalArchitecture = new ArrayList<HiddenSubstrateGroup>();
 		//Input substrates excluded because they are provided by the HyperNEATTask
 		//tetrisConvolutionalArchitecture.add(new Triple<>(2,10,20)); //input
 
-		tetrisConvolutionalArchitecture.add(new Triple<>(3,8,18));
-		tetrisConvolutionalArchitecture.add(new Triple<>(4,6,16));
-		tetrisConvolutionalArchitecture.add(new Triple<>(6,4,14));
-		tetrisConvolutionalArchitecture.add(new Triple<>(100,1,1));
+		tetrisConvolutionalArchitecture.add(new HiddenSubstrateGroup(3,8,18, 0));
+		tetrisConvolutionalArchitecture.add(new HiddenSubstrateGroup(4,6,16, 1));
+		tetrisConvolutionalArchitecture.add(new HiddenSubstrateGroup(6,4,14, 2));
+		tetrisConvolutionalArchitecture.add(new HiddenSubstrateGroup(100,1,1, 3));
 
 		//Output substrates excluded because they are provided by the HyperNEATTask
 		//tetrisConvolutionalArchitecture.add(new Triple<>(1,1,1)); //output

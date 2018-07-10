@@ -165,38 +165,21 @@ public class HyperNEATUtil {
 	 *  triple like this (layer, width of substrates in this layer, height of substrates in this layer)  
 	 * @return list of initialized 2 dimension Substrate objects
 	 */
-	private static List<Substrate> getHiddenSubstrateInformation(List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture) {
+	private static List<Substrate> getHiddenSubstrateInformation(List<HiddenSubstrateGroup> networkHiddenArchitecture) {
 		List<Substrate> substrateInformation = new LinkedList<Substrate>();
-
-		//(0,0) are placeholder values. 
-		//Devon: New Pairs were originally constructed with each iteration of the for loop below...
-		//If errors arise, revert code back to this method. 
-		Pair<Integer, Integer> substrateDimension = new Pair<Integer, Integer>(0,0);
-
 		//Coordinates of substrate in vector space, (x,y,z). First 2 zeros are placeholder values.
-		//Devon: New Triples were originally constructed with each iteration of the for loop below...
-		//If errors arise, revert code back to this method.
 		Triple<Integer, Integer, Integer> substrateCoordinates = new Triple<Integer, Integer, Integer>(0,0,0);
 
-		//networkHiddenArchitecture.size() = number of hidden layers
 		// Add 2D hidden/processing layer(s)
 		for(int i = 0; i < networkHiddenArchitecture.size(); i++) {			
-			Triple<Integer,Integer,Integer> currentLayer = networkHiddenArchitecture.get(i);
-			//assigns the pair (substrate width, substrate height) of the ith hidden layer to substrateDimension
-			substrateDimension.t1 = currentLayer.t2; 
-			substrateDimension.t2 = currentLayer.t3;
-
-			//iterates for every substrate in the ith layer
-			//ithLayer.t1 = width of the ith layer
-			for(int k = 0; k < currentLayer.t1; k++) {
-				//kth substrate. i.e. x coordinate = k
-				substrateCoordinates.t1 = k;
-
-				//(i + 1)th layer. i.e. y coordinate = i + 1.
-				substrateCoordinates.t2 = i + 1;
-
-				Substrate processSubstrate = new Substrate(substrateDimension, Substrate.PROCCESS_SUBSTRATE, substrateCoordinates,
-						"process(" + k + "," + i + ")", 
+			HiddenSubstrateGroup hiddenSubstrateGroup = networkHiddenArchitecture.get(i);
+			Pair<Integer, Integer> hiddenSubstrateGroupSize = hiddenSubstrateGroup.substrateSize;
+			Triple<Integer, Integer, Integer> hiddenSubstrateGroupStartLocation = hiddenSubstrateGroup.hiddenSubstrateGroupStartLocation;
+			substrateCoordinates.t2 = hiddenSubstrateGroupStartLocation.t2;
+			for(int x = 0; x < hiddenSubstrateGroup.numSubstrates; x++) {
+				substrateCoordinates.t1 = hiddenSubstrateGroupStartLocation.t1 + x;
+				Substrate processSubstrate = new Substrate(hiddenSubstrateGroupSize, Substrate.PROCCESS_SUBSTRATE, substrateCoordinates,
+						"process(" + substrateCoordinates.t1 + "," + substrateCoordinates.t2 + ")", 
 						CommonConstants.convolution ? ActivationFunctions.FTYPE_RE_LU : Substrate.DEFAULT_ACTIVATION_FUNCTION);
 				substrateInformation.add(processSubstrate);
 			}

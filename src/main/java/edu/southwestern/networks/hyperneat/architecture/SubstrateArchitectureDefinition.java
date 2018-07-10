@@ -2,9 +2,9 @@ package edu.southwestern.networks.hyperneat.architecture;
 
 import java.util.List;
 
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
-import edu.southwestern.util.datastructures.Triple;
 
 public interface SubstrateArchitectureDefinition {
 
@@ -16,7 +16,7 @@ public interface SubstrateArchitectureDefinition {
 		 *	The second param is the width of each substrate. The third param is the height of each substrate.
 		 *	Output and input layers are excluded because those are defined by the task. 
 		 */
-		public List<Triple<Integer, Integer, Integer>> getNetworkHiddenArchitecture();
+		public List<HiddenSubstrateGroup> getNetworkHiddenArchitecture();
 		
 		
 		/**

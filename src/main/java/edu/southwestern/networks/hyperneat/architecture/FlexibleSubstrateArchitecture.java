@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.Substrate;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
@@ -25,10 +26,11 @@ public class FlexibleSubstrateArchitecture {
 	 *	The second param is the width of each substrate. The third param is the height of each substrate.
 	 *	Output and input layers are excluded because those are defined by the task. 
 	 */
-	public static List<Triple<Integer, Integer, Integer>> getHiddenArchitecture(HyperNEATTask hnt) {
-		List<Triple<Integer, Integer, Integer>> hiddenArchitecture = new ArrayList<Triple<Integer, Integer, Integer>>();
+	public static List<HiddenSubstrateGroup> getHiddenArchitecture(HyperNEATTask hnt) {
+		List<HiddenSubstrateGroup> hiddenArchitecture = new ArrayList<HiddenSubstrateGroup>();
 		List<Substrate> substrateInformation = hnt.getSubstrateInformation();	
-		int yCoordCount = 0; //this will equal the number of substrates per layer when it is added to hiddenArchitecture
+		int numSubstratesPerLayer = 0; //this will equal the number of substrates per layer when it is added to hiddenArchitecture
+		int layerCount = 0;
 		int previousSubstrateType = Substrate.INPUT_SUBSTRATE;
 		int previousYCoordinate = -1, previousWidth = -1, previousHeight = -1; //these are invalid values. they are just here to initialize.
 		int currentSubstrateType, currentWidth, currentHeight, currentYCoordinate;
@@ -40,12 +42,13 @@ public class FlexibleSubstrateArchitecture {
 			currentWidth = currentSubstrate.getSize().t1;
 			currentHeight = currentSubstrate.getSize().t2;
 			if (previousSubstrateType == Substrate.PROCCESS_SUBSTRATE && currentYCoordinate != previousYCoordinate) {
-				assert previousWidth > 0 && previousHeight > 0 && yCoordCount > 0;
-				hiddenArchitecture.add(new Triple<Integer, Integer, Integer>(yCoordCount, previousWidth, previousHeight));
-				yCoordCount = 0;
+				assert previousWidth > 0 && previousHeight > 0 && numSubstratesPerLayer > 0;
+				hiddenArchitecture.add(new HiddenSubstrateGroup(new Pair<Integer, Integer>(previousWidth, previousHeight), numSubstratesPerLayer, layerCount));
+				numSubstratesPerLayer = 0;
+				layerCount++;
 			}
 			if (currentSubstrateType == Substrate.PROCCESS_SUBSTRATE) {
-				yCoordCount++;
+				numSubstratesPerLayer++;
 			}
 			previousSubstrateType = currentSubstrateType;
 			previousYCoordinate = currentYCoordinate;
@@ -92,13 +95,13 @@ public class FlexibleSubstrateArchitecture {
 	public static List<SubstrateConnectivity> getDefaultConnectivity(
 			List<String> inputSubstrateNames, 
 			List<String> outputSubstrateNames, 
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture) {
+			List<HiddenSubstrateGroup> networkHiddenArchitecture) {
 		List<SubstrateConnectivity> networkConnectivity = new ArrayList<SubstrateConnectivity>();
 		//connects input layer to first hidden/process layer
 		connectInputToFirstHidden(networkConnectivity, inputSubstrateNames, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_CONVOLUTION);
 
 		//connects adjacent, possibly convolutional hidden layers
-		connectAllAdjacentHiddenLayers(networkConnectivity, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		linearlyConnectAllGroups(networkConnectivity, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_CONVOLUTION);
 
 		//connects last hidden/process layer to output layer
 		connectLastHiddenToOutput(networkConnectivity, outputSubstrateNames, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_FULL);
@@ -116,7 +119,7 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectInputToFirstHidden(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> inputSubstrateNames, 
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture, 
+			List<HiddenSubstrateGroup> networkHiddenArchitecture, 
 			int connectivityType) {
 		if (connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
 			connectInputToFirstHidden(networkConnectivity, inputSubstrateNames, networkHiddenArchitecture,
@@ -137,7 +140,7 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectInputToFirstHidden(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> inputSubstrateNames, 
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture, 
+			List<HiddenSubstrateGroup> networkHiddenArchitecture, 
 			int receptiveFieldWidth, int receptiveFieldHeight) {
 		if (networkHiddenArchitecture.size() > 0) {
 			connectInputToHidden(networkConnectivity, inputSubstrateNames, networkHiddenArchitecture,
@@ -157,13 +160,15 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectInputToHidden(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> inputSubstrateNames,
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int receptiveFieldWidth, int receptiveFieldHeight, int locationOfLayer) {
-		int hiddenLayerWidth = networkHiddenArchitecture.get(locationOfLayer).t1; 
+		HiddenSubstrateGroup hiddenSubstrateGroup = networkHiddenArchitecture.get(locationOfLayer);
+		Triple<Integer, Integer, Integer> hiddenSubstrateGroupStartLocation = hiddenSubstrateGroup.hiddenSubstrateGroupStartLocation;
+		int numSubstrates = networkHiddenArchitecture.get(locationOfLayer).numSubstrates; 
 		for (String in: inputSubstrateNames) {
-			for (int i = 0; i < hiddenLayerWidth; i++) {
+			for (int x = 0; x < numSubstrates; x++) {
 				networkConnectivity.add(new SubstrateConnectivity
-						(in, "process(" + i + "," + locationOfLayer + ")", receptiveFieldWidth, receptiveFieldHeight));
+						(in, "process(" + (hiddenSubstrateGroupStartLocation.t1 + x) + "," + hiddenSubstrateGroupStartLocation.t2 + ")", receptiveFieldWidth, receptiveFieldHeight));
 			}
 		}
 	}
@@ -174,34 +179,42 @@ public class FlexibleSubstrateArchitecture {
 	 * @param networkHiddenArchitecture
 	 * @param connectivityType how these two substrates are connected (i.e. full, convolutional,...)
 	 */
-	public static void connectAllAdjacentHiddenLayers(
+	public static void linearlyConnectAllGroups(
 			List<SubstrateConnectivity> networkConnectivity, 
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int connectivityType) {
 		if (connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
-			connectAllAdjacentHiddenLayers(networkConnectivity, networkHiddenArchitecture,
+			linearlyConnectAllGroups(networkConnectivity, networkHiddenArchitecture,
 					Parameters.parameters.integerParameter("receptiveFieldWidth"), Parameters.parameters.integerParameter("receptiveFieldHeight"));
 		} else {
-			connectAllAdjacentHiddenLayers(networkConnectivity, networkHiddenArchitecture, -1, -1);
+			linearlyConnectAllGroups(networkConnectivity, networkHiddenArchitecture, -1, -1);
 		}
 	}
 
 	/**
-	 * connects all adjacent hidden substrate layers with specified receptive field
+	 * linearly connects all HiddenSubstrateGroups. Equivalent to 
+	 * connecting all adjacent hidden substrate layers if each group exists in its own layer
 	 * @param networkConnectivity list that connectivity is appended to
 	 * @param networkHiddenArchitecture architecture of hidden layers
 	 * @param receptiveFieldWidth width of receptive field window, -1 if nonconvolutional
 	 * @param receptiveFieldHeight height of receptive field window, - 1 if nonconvolutional
 	 */
-	public static void connectAllAdjacentHiddenLayers(
+	public static void linearlyConnectAllGroups(
 			List<SubstrateConnectivity> networkConnectivity, 
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int receptiveFieldWidth, int receptiveFieldHeight) {
-		int numLayers = networkHiddenArchitecture.size();
-		for (int i = 0; i < numLayers - 1; i++) {
-			for (int src = 0; src < networkHiddenArchitecture.get(i).t1; src++) {
-				for (int target = 0; target < networkHiddenArchitecture.get(i + 1).t1; target++) {
-					networkConnectivity.add(new SubstrateConnectivity("process(" + src + "," + i + ")", "process(" + target + "," + (i + 1) + ")", receptiveFieldWidth, receptiveFieldHeight));
+		int numGroups = networkHiddenArchitecture.size();
+		for (int i = 0; i < numGroups - 1; i++) {
+			HiddenSubstrateGroup sourceGroup = networkHiddenArchitecture.get(i);
+			HiddenSubstrateGroup targetGroup = networkHiddenArchitecture.get(i = 1);
+			Triple<Integer, Integer, Integer> sourceSubstrateGroupStartLocation = sourceGroup.hiddenSubstrateGroupStartLocation;
+			Triple<Integer, Integer, Integer> targetSubstrateGroupStartLocation = targetGroup.hiddenSubstrateGroupStartLocation;
+			for (int src = 0; src < sourceGroup.numSubstrates; src++) {
+				for (int target = 0; target < targetGroup.numSubstrates; target++) {
+					networkConnectivity.add(new SubstrateConnectivity(
+							"process(" + (sourceSubstrateGroupStartLocation.t1 + src) + "," + sourceSubstrateGroupStartLocation.t2 + ")", 
+							"process(" + (targetSubstrateGroupStartLocation.t1 + target) + "," + targetSubstrateGroupStartLocation.t2 + ")", 
+							receptiveFieldWidth, receptiveFieldHeight));
 				}
 			}
 		}
@@ -246,7 +259,7 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectLastHiddenToOutput(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> outputSubstrateNames,
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int connectivityType) {
 		if (connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
 			connectLastHiddenToOutput(networkConnectivity, outputSubstrateNames, networkHiddenArchitecture,
@@ -267,7 +280,7 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectLastHiddenToOutput(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> outputSubstrateNames,
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int receptiveFieldWidth, int receptiveFieldHeight) {
 		if (networkHiddenArchitecture.size() > 0) {
 			connectHiddenToOutput(networkConnectivity, outputSubstrateNames, networkHiddenArchitecture, receptiveFieldWidth, receptiveFieldHeight, networkHiddenArchitecture.size() - 1);
@@ -286,13 +299,15 @@ public class FlexibleSubstrateArchitecture {
 	public static void connectHiddenToOutput(
 			List<SubstrateConnectivity> networkConnectivity, 
 			List<String> outputSubstrateNames,
-			List<Triple<Integer, Integer, Integer>> networkHiddenArchitecture,
+			List<HiddenSubstrateGroup> networkHiddenArchitecture,
 			int receptiveFieldWidth, int receptiveFieldHeight, int locationOfLayer) {
-		int hiddenLayerWidth = networkHiddenArchitecture.get(locationOfLayer).t1; 
-		for (int i = 0; i < hiddenLayerWidth; i++) {
+		HiddenSubstrateGroup hiddenSubstrateGroup = networkHiddenArchitecture.get(locationOfLayer);
+		for (int i = 0; i < hiddenSubstrateGroup.numSubstrates; i++) {
+			Triple<Integer, Integer, Integer> hiddenSubstrateGroupStartLocation = hiddenSubstrateGroup.hiddenSubstrateGroupStartLocation;
 			for (String out: outputSubstrateNames) {
 				networkConnectivity.add(new SubstrateConnectivity
-						("process(" + i + "," + locationOfLayer + ")", out, receptiveFieldWidth, receptiveFieldHeight));
+						("process(" + (hiddenSubstrateGroupStartLocation.t1 + i) + "," + hiddenSubstrateGroupStartLocation.t2 + ")", 
+								out, receptiveFieldWidth, receptiveFieldHeight));
 			}
 		}
 	}
