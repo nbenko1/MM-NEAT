@@ -38,7 +38,6 @@ import edu.southwestern.tasks.rlglue.featureextractors.StateVariableExtractor;
 import edu.southwestern.tasks.ut2004.actuators.OpponentRelativeMovementOutputModel;
 import edu.southwestern.tasks.ut2004.sensors.OpponentRelativeSensorModel;
 import edu.southwestern.tasks.ut2004.weapons.SimpleWeaponManager;
-import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.random.GaussianGenerator;
 import edu.southwestern.util.sound.SoundUtilExamples;
 import edu.southwestern.util.stats.Average;
@@ -48,8 +47,6 @@ import micro.ai.mcts.uct.UCT;
 import oldpacman.controllers.examples.Legacy;
 import oldpacman.controllers.examples.StarterPacMan;
 import oldpacman.game.Constants;
-import popacman.examples.StarterPacMan.MyPacMan;
-import popacman.examples.StarterISMCTS.InformationSetMCTSPacMan;
 
 /**
  * Used for processing and containing command line parameters.
