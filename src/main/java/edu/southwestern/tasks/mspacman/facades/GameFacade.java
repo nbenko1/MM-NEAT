@@ -1072,10 +1072,10 @@ public class GameFacade {
 				return result;
 				
 			} else {
-				return poG.getActivePillsIndices();	
+				return poG.getActivePowerPillsIndices();//.getActivePillsIndices();	
 			}	
 		} else {
-			return oldG.getActivePillsIndices();	
+			return oldG.getActivePowerPillsIndices();//.getActivePillsIndices();	
 		}
 	}
 
