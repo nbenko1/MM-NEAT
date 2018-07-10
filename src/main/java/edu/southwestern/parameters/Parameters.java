@@ -751,6 +751,8 @@ public class Parameters {
 		doubleOptions.add("netPerturbRate", 0.8, "Mutation rate for network weight perturbation");
 		doubleOptions.add("netSpliceRate", 0.2, "Mutation rate for splicing of new network nodes");
 		doubleOptions.add("neuralStyleStyleWeight", 0.2, "How much style image influences neural style transfer");
+		doubleOptions.add("nodeNormalizationActivationThreshold", 0.0, "defines the threshold below which an activation does not become normalized");
+		doubleOptions.add("nodeNormalizationContributionThreshold", 0.0, "defines the threshold below which an activation does not contribute to the normalization of the node");
 		doubleOptions.add("perLinkMutateRate", 0.05, "Per link chance of weight perturbation");
 		doubleOptions.add("percentDeathCampsToSave", 0.1, "What percentage of pre-death states to save for camps");
 		doubleOptions.add("percentDeathVsPPCamps", 0.5, "Percent of death camps (rest are PP camps");

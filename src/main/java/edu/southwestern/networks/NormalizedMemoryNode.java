@@ -1,6 +1,7 @@
 package edu.southwestern.networks;
 
 import edu.southwestern.networks.TWEANN.Link;
+import edu.southwestern.parameters.Parameters;
 
 public class NormalizedMemoryNode extends TWEANN.Node{
 	private int numActivationsSeen;
@@ -22,21 +23,27 @@ public class NormalizedMemoryNode extends TWEANN.Node{
 	@Override
 	protected void activateAndTransmit() {
 		double immediateActivation = ActivationFunctions.activation(ftype, sum);
-		numActivationsSeen++;
-		//calculate mean
-		double oldMean = memoryMean; // save for Sum of Squares calculation below
-		memoryMean += (immediateActivation - memoryMean) / numActivationsSeen;
-		
-		//calculate variance
-		memorySumOfSquares += (immediateActivation - oldMean) * (immediateActivation - memoryMean);
-		double variance = memorySumOfSquares / numActivationsSeen;
+		double nodeNormalizationContributionThreshold = Parameters.parameters.doubleParameter("nodeNormalizationContributionThreshold");
+		if (immediateActivation >=  nodeNormalizationContributionThreshold || immediateActivation < -nodeNormalizationContributionThreshold) {
+			numActivationsSeen++;
+			//calculate mean
+			double oldMean = memoryMean; // save for Sum of Squares calculation below
+			memoryMean += (immediateActivation - memoryMean) / numActivationsSeen;
 
-		//normalize activation
-		activation = (immediateActivation - memoryMean) / Math.sqrt(variance + EPSILON);
-		
-		//scale and shift
-		activation = gamma * activation + beta;
-		
+			//calculate variance
+			memorySumOfSquares += (immediateActivation - oldMean) * (immediateActivation - memoryMean);
+			double nodeNormalizationActivationThreshold = Parameters.parameters.doubleParameter("nodeNormalizationThreshold");
+			if (immediateActivation >=  nodeNormalizationActivationThreshold || immediateActivation < -nodeNormalizationActivationThreshold) {
+				double variance = memorySumOfSquares / numActivationsSeen;
+
+				//normalize activation
+				activation = (immediateActivation - memoryMean) / Math.sqrt(variance + EPSILON);
+
+				//scale and shift
+				activation = gamma * activation + beta;
+			}
+		}
+
 		// Standard code from original activateAndTransmit method
 		// reset sum to original bias after activation 
 		sum = bias;
