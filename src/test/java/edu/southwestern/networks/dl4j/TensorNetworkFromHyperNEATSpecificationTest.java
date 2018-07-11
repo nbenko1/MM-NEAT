@@ -85,13 +85,8 @@ public class TensorNetworkFromHyperNEATSpecificationTest {
 
 	        // The error margin here is fairly large. This is (presumably) because
 	        // ND4J (I believe) favors float instead of double.
-	        try {
-	        	assertArrayEquals(hyperNEATOutput, dl4jOutput, 0.2);
-	        } catch (Exception e) {
-	        	System.out.println("hyperNEATOutput: " + hyperNEATOutput + "\ndl4jOutput: " + dl4jOutput + "\nrandomInput: " + randomInput);
-	        	e.printStackTrace();
-	        	throw e;
-	        }
+	        String errorMessage = "hyperNEATOutput: " + hyperNEATOutput.toString() + "\ndl4jOutput: " + dl4jOutput.toString() + "\nrandomInput: " + randomInput.toString();
+	        assertArrayEquals(errorMessage, hyperNEATOutput, dl4jOutput, 0.2);
 		}
 		
 		
