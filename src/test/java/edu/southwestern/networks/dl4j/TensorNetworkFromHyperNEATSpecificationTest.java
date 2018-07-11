@@ -1,7 +1,6 @@
 package edu.southwestern.networks.dl4j;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import edu.southwestern.networks.hyperneat.HyperNEATUtil;
 import edu.southwestern.networks.hyperneat.Substrate;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask;
-import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.random.RandomNumbers;
 
 public class TensorNetworkFromHyperNEATSpecificationTest {
@@ -87,7 +85,13 @@ public class TensorNetworkFromHyperNEATSpecificationTest {
 
 	        // The error margin here is fairly large. This is (presumably) because
 	        // ND4J (I believe) favors float instead of double.
-        	assertArrayEquals(hyperNEATOutput, dl4jOutput, 0.2);
+	        try {
+	        	assertArrayEquals(hyperNEATOutput, dl4jOutput, 0.2);
+	        } catch (Exception e) {
+	        	System.out.println("hyperNEATOutput: " + hyperNEATOutput + "\ndl4jOutput: " + dl4jOutput + "\nrandomInput: " + randomInput);
+	        	e.printStackTrace();
+	        	throw e;
+	        }
 		}
 		
 		
