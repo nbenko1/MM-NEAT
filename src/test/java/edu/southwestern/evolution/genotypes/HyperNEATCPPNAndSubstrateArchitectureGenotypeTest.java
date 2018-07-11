@@ -12,13 +12,13 @@ import org.junit.Test;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.evolution.EvolutionaryHistory;
 import edu.southwestern.networks.TWEANN;
+import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 import edu.southwestern.networks.hyperneat.architecture.HiddenSkipsHidden;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask;
 import edu.southwestern.util.PopulationUtil;
-import edu.southwestern.util.datastructures.Triple;
 import edu.southwestern.util.random.RandomNumbers;
 
 public class HyperNEATCPPNAndSubstrateArchitectureGenotypeTest {
@@ -54,10 +54,13 @@ public class HyperNEATCPPNAndSubstrateArchitectureGenotypeTest {
 		hncasag.cascadeExpansion(1, 10, 20, SubstrateConnectivity.CTYPE_CONVOLUTION);
 
 		//check hidden architecture equality
-		Iterator<Triple<Integer, Integer, Integer>> it_hsh = hsh.getNetworkHiddenArchitecture().iterator();
+		Iterator<HiddenSubstrateGroup> it_hsh = hsh.getNetworkHiddenArchitecture().iterator();
 		assertEquals(hsh.getNetworkHiddenArchitecture().size(), hncasag.hiddenArchitecture.size());
-		for(Triple<Integer, Integer, Integer> substrate: hncasag.hiddenArchitecture) {
-			assertEquals(substrate, it_hsh.next());
+		for(HiddenSubstrateGroup substrate: hncasag.hiddenArchitecture) {
+			HiddenSubstrateGroup hshHiddenSubstrateGroup = it_hsh.next();
+			assertEquals(substrate.hiddenSubstrateGroupStartLocation, hshHiddenSubstrateGroup.hiddenSubstrateGroupStartLocation);
+			assertEquals(substrate.substrateSize, hshHiddenSubstrateGroup.substrateSize);
+			assertEquals(substrate.numSubstrates, hshHiddenSubstrateGroup.numSubstrates);
 		}
 
 		//check connectivity set equality

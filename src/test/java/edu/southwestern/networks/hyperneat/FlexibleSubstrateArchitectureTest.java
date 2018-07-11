@@ -10,7 +10,7 @@ import edu.southwestern.evolution.EvolutionaryHistory;
 import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask;
-import edu.southwestern.util.datastructures.Triple;
+import edu.southwestern.util.datastructures.Pair;
 
 public class FlexibleSubstrateArchitectureTest {
 
@@ -24,10 +24,11 @@ public class FlexibleSubstrateArchitectureTest {
 		MMNEAT.loadClasses();
 		EvolutionaryHistory.initArchetype(0);
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
-		assertEquals(new Integer(1), test.get(0).t1);
-		assertEquals(new Integer(8), test.get(0).t2);
-		assertEquals(new Integer(18), test.get(0).t3);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
+		assertEquals(1, test.get(0).numSubstrates);
+		assertEquals(new Integer(8), substrateSize.t1);
+		assertEquals(new Integer(18), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -43,14 +44,16 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 2);
-		assertEquals(test.get(0).t1, new Integer(1));
-		assertEquals(new Integer(8), test.get(0).t2);
-		assertEquals(new Integer(18), test.get(0).t3);
-		assertEquals(new Integer(1), test.get(1).t1);
-		assertEquals(new Integer(6), test.get(1).t2);
-		assertEquals(new Integer(16), test.get(1).t3);
+		assertEquals(test.get(0).numSubstrates, 1);
+		assertEquals(new Integer(8), substrateSize.t1);
+		assertEquals(new Integer(18), substrateSize.t2);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(1, test.get(1).numSubstrates);
+		assertEquals(new Integer(6), substrateSize.t1);
+		assertEquals(new Integer(16), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -66,12 +69,12 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
-		System.out.print("here: " + test.size());
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 1);
-		assertEquals(test.get(0).t1, new Integer(2));
-		assertEquals(new Integer(8), test.get(0).t2);
-		assertEquals(new Integer(18), test.get(0).t3);
+		assertEquals(test.get(0).numSubstrates, 2);
+		assertEquals(new Integer(8), substrateSize.t1);
+		assertEquals(new Integer(18), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -87,14 +90,16 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 2);
-		assertEquals(new Integer(2), test.get(0).t1);
-		assertEquals(new Integer(8), test.get(0).t2);
-		assertEquals(new Integer(18), test.get(0).t3);
-		assertEquals(new Integer(2), test.get(1).t1);
-		assertEquals(new Integer(6), test.get(1).t2);
-		assertEquals(new Integer(16), test.get(1).t3);
+		assertEquals(2, test.get(0).numSubstrates);
+		assertEquals(new Integer(8), substrateSize.t1);
+		assertEquals(new Integer(18), substrateSize.t2);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(2, test.get(1).numSubstrates);
+		assertEquals(new Integer(6), substrateSize.t1);
+		assertEquals(new Integer(16), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -110,11 +115,12 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 1);
-		assertEquals(new Integer(1), test.get(0).t1);
-		assertEquals(new Integer(10), test.get(0).t2);
-		assertEquals(new Integer(20), test.get(0).t3);
+		assertEquals(1, test.get(0).numSubstrates);
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -130,13 +136,15 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
-		assertEquals(new Integer(2), test.get(0).t1);
-		assertEquals(new Integer(10), test.get(0).t2);
-		assertEquals(new Integer(20), test.get(0).t3);
-		assertEquals(new Integer(2), test.get(1).t1);
-		assertEquals(new Integer(10), test.get(1).t2);
-		assertEquals(new Integer(20), test.get(1).t3);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
+		assertEquals(2, test.get(0).numSubstrates);
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(2, test.get(1).numSubstrates);
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -152,20 +160,24 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 4);
-		assertEquals(new Integer(4), test.get(0).t1);
-		assertEquals(new Integer(10), test.get(0).t2);
-		assertEquals(new Integer(20), test.get(0).t3);
-		assertEquals(new Integer(4), test.get(1).t1);
-		assertEquals(new Integer(10), test.get(1).t2);
-		assertEquals(new Integer(20), test.get(1).t3);
-		assertEquals(new Integer(4), test.get(2).t1);
-		assertEquals(new Integer(10), test.get(2).t2);
-		assertEquals(new Integer(20), test.get(2).t3);
-		assertEquals(new Integer(4), test.get(3).t1);
-		assertEquals(new Integer(10), test.get(3).t2);
-		assertEquals(new Integer(20), test.get(3).t3);
+		assertEquals(4, test.get(0).numSubstrates);
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
+		assertEquals(4, test.get(1).numSubstrates);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
+		assertEquals(4, test.get(2).numSubstrates);
+		substrateSize = test.get(2).substrateSize;
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
+		assertEquals(4, test.get(3).numSubstrates);
+		substrateSize = test.get(3).substrateSize;
+		assertEquals(new Integer(10), substrateSize.t1);
+		assertEquals(new Integer(20), substrateSize.t2);
 		MMNEAT.clearClasses();
 	}
 	
@@ -181,14 +193,16 @@ public class FlexibleSubstrateArchitectureTest {
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
 
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(),  2);
-		assertEquals(new Integer(4), test.get(0).t1);
-		assertEquals(new Integer(6), test.get(0).t2);
-		assertEquals(new Integer(16), test.get(0).t3);
-		assertEquals(new Integer(4), test.get(1).t1);
-		assertEquals(new Integer(2), test.get(1).t2);
-		assertEquals(new Integer(12), test.get(1).t3);
+		assertEquals(4, test.get(0).numSubstrates);
+		assertEquals(new Integer(6), substrateSize.t1);
+		assertEquals(new Integer(16), substrateSize.t2);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(4, test.get(1).numSubstrates);
+		assertEquals(new Integer(2), substrateSize.t1);
+		assertEquals(new Integer(12), substrateSize.t2);
 
 		MMNEAT.clearClasses();
 	}
@@ -204,20 +218,24 @@ public class FlexibleSubstrateArchitectureTest {
 		EvolutionaryHistory.initArchetype(0);
 		
 		HyperNEATTask tetris = (HyperNEATTask) MMNEAT.task;
-		List<Triple<Integer, Integer, Integer>> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		List<HiddenSubstrateGroup> test = FlexibleSubstrateArchitecture.getHiddenArchitecture(tetris);
+		Pair<Integer, Integer> substrateSize = test.get(0).substrateSize;
 		assertEquals(test.size(), 4);
-		assertEquals(new Integer(4), test.get(0).t1);
-		assertEquals(new Integer(8), test.get(0).t2);
-		assertEquals(new Integer(18), test.get(0).t3);
-		assertEquals(new Integer(4), test.get(1).t1);
-		assertEquals(new Integer(6), test.get(1).t2);
-		assertEquals(new Integer(16), test.get(1).t3);
-		assertEquals(new Integer(4), test.get(2).t1);
-		assertEquals(new Integer(4), test.get(2).t2);
-		assertEquals(new Integer(14), test.get(2).t3);
-		assertEquals(new Integer(4), test.get(3).t1);
-		assertEquals(new Integer(2), test.get(3).t2);
-		assertEquals(new Integer(12), test.get(3).t3);
+		assertEquals(4, test.get(0).numSubstrates);
+		assertEquals(new Integer(8), substrateSize.t1);
+		assertEquals(new Integer(18), substrateSize.t2);
+		substrateSize = test.get(1).substrateSize;
+		assertEquals(4, test.get(1).numSubstrates);
+		assertEquals(new Integer(6), substrateSize.t1);
+		assertEquals(new Integer(16), substrateSize.t2);
+		substrateSize = test.get(2).substrateSize;
+		assertEquals(4, test.get(2).numSubstrates);
+		assertEquals(new Integer(4), substrateSize.t1);
+		assertEquals(new Integer(14), substrateSize.t2);
+		substrateSize = test.get(3).substrateSize;
+		assertEquals(4, test.get(3).numSubstrates);
+		assertEquals(new Integer(2), substrateSize.t1);
+		assertEquals(new Integer(12), substrateSize.t2);
 		MMNEAT.clearClasses();
 	}
 }

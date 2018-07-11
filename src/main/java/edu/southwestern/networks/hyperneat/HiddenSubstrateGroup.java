@@ -1,6 +1,9 @@
 package edu.southwestern.networks.hyperneat;
 
-
+/**
+ * This class defines a group of substrates that all have the same connectivity, activation function, substrate size, and layer
+ * @author Devon Fulcher
+ */
 import edu.southwestern.util.datastructures.Pair;
 import edu.southwestern.util.datastructures.Triple;
 public class HiddenSubstrateGroup {

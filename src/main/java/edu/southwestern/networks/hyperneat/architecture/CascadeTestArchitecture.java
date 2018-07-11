@@ -6,6 +6,8 @@ import java.util.List;
 import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
+import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
+import edu.southwestern.networks.hyperneat.architecture.SubstrateArchitectureDefinition;
 import edu.southwestern.util.datastructures.Pair;
 
 /**
@@ -13,7 +15,7 @@ import edu.southwestern.util.datastructures.Pair;
  * @author DevonFulcher
  *
  */
-public class CascadeTest implements SubstrateArchitectureDefinition{
+public class CascadeTestArchitecture implements SubstrateArchitectureDefinition{
 
 	@Override
 	public List<HiddenSubstrateGroup> getNetworkHiddenArchitecture() {

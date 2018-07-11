@@ -9,7 +9,6 @@ import edu.southwestern.networks.hyperneat.HiddenSubstrateGroup;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
 import edu.southwestern.util.datastructures.Pair;
-import edu.southwestern.util.datastructures.Triple;
 
 /**
  * A custom hyperneat architecture with heterogeneous receptive fields with a depth of 2 and width of 1. The input is connected to 
@@ -34,7 +33,7 @@ public class TuneUp3x31x1 implements SubstrateArchitectureDefinition{
 		Pair<List<String>, List<String>> io = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt);
 		List<HiddenSubstrateGroup> networkHiddenArchitecture = getNetworkHiddenArchitecture();
 		FlexibleSubstrateArchitecture.connectInputToFirstHidden(substrateConnectivity, io.t1, networkHiddenArchitecture, 3, 3);
-		FlexibleSubstrateArchitecture.connectAllAdjacentHiddenLayers(substrateConnectivity, networkHiddenArchitecture, 1, 1);
+		FlexibleSubstrateArchitecture.linearlyConnectAllGroups(substrateConnectivity, networkHiddenArchitecture, 1, 1);
 		FlexibleSubstrateArchitecture.connectLastHiddenToOutput(substrateConnectivity, io.t2, networkHiddenArchitecture, SubstrateConnectivity.CTYPE_FULL);
 		return substrateConnectivity;
 	}
