@@ -1,6 +1,5 @@
 package edu.southwestern.tasks.mspacman.agentcontroller.pacman;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import edu.southwestern.MMNEAT.MMNEAT;
