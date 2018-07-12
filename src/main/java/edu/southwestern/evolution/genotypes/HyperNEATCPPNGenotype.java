@@ -143,12 +143,12 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		TWEANN cppn = getCPPN();// CPPN used to create TWEANN network
 		List<Substrate> subs = getSubstrateInformation(hnt);// extract substrate information from domain
 		List<SubstrateConnectivity> connections = getSubstrateConnectivity(hnt);// extract substrate connectivity from domain
-		
+
 		if (Parameters.parameters.booleanParameter("useCoordConv")) {
 			int numInputSubstrates = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1.size();
 			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, numInputSubstrates);
 		}
-		
+
 		ArrayList<NodeGene> newNodes = null;
 		ArrayList<LinkGene> newLinks = null;
 
@@ -290,9 +290,7 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	 * @return array list of NodeGenes from substrates
 	 */
 	public ArrayList<NodeGene> createSubstrateNodes(HyperNEATTask hnt, TWEANN cppn, List<Substrate> subs, int layersWidth, int layersHeight) {
-
 		boolean convolutionWeightSharing = Parameters.parameters.booleanParameter("convolutionWeightSharing");
-
 		int biasIndex = indexFirstBiasOutput(hnt); // first bias index
 		ArrayList<NodeGene> newNodes = new ArrayList<NodeGene>();
 		// loops through substrate list
@@ -304,12 +302,14 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 
 				// Substrate types and Neuron types match and use same values
 				double bias = 0.0; // default
-
-
-				// TODO: Add a case for coord conv that sets the bias based on coordinate position
-
-				// Non-input substrates can have a bias if desired
-				if(CommonConstants.evolveHyperNEATBias && sub.getStype() != Substrate.INPUT_SUBSTRATE) {
+				
+				if(sub.getStype() == Substrate.ICOORDCONV_SUBSTRATE) {
+					double scaledTargetX = MMNEAT.substrateMapping.transformCoordinates(new Tuple2D(x, y), sub.getSize().t1, sub.getSize().t2).getX();
+					bias = scaledTargetX;
+				} else if (sub.getStype() == Substrate.JCOORDCONV_SUBSTRATE) {
+					double scaledTargetY = MMNEAT.substrateMapping.transformCoordinates(new Tuple2D(x, y), sub.getSize().t1, sub.getSize().t2).getY();
+					bias = scaledTargetY;
+				} else if(CommonConstants.evolveHyperNEATBias && sub.getStype() != Substrate.INPUT_SUBSTRATE) {// Non-input substrates can have a bias if desired
 					// Ask CPPN to generate a bias for each neuron
 					ILocated2D scaledTargetCoordinates = MMNEAT.substrateMapping.transformCoordinates(new Tuple2D(x, y), sub.getSize().t1, sub.getSize().t2);
 					double[] filteredInputs = hnt.filterCPPNInputs(new double[]{0, 0, scaledTargetCoordinates.getX(), scaledTargetCoordinates.getY(), BIAS});

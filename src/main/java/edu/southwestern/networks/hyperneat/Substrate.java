@@ -20,6 +20,8 @@ public class Substrate {
 	public final static int INPUT_SUBSTRATE = 0;
 	public final static int PROCCESS_SUBSTRATE = 1;
 	public final static int OUTPUT_SUBSTRATE = 2;
+	public final static int ICOORDCONV_SUBSTRATE = 3;
+	public final static int JCOORDCONV_SUBSTRATE = 4;
 	// unique string identifier for substrate
 	private final String name;
 	// encodes size of rectangular substrate (sticking with 2D for now)
