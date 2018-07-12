@@ -12,7 +12,6 @@ import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.HyperNEATUtil;
 import edu.southwestern.networks.hyperneat.Substrate;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
-import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.CartesianGeometricUtilities;
@@ -145,8 +144,7 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		List<SubstrateConnectivity> connections = getSubstrateConnectivity(hnt);// extract substrate connectivity from domain
 
 		if (Parameters.parameters.booleanParameter("useCoordConv")) {
-			int numInputSubstrates = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1.size();
-			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, numInputSubstrates);
+			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, hnt);
 		}
 
 		ArrayList<NodeGene> newNodes = null;
@@ -368,7 +366,8 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 				newNodes.add(newSubstrateNodeGene(sub, bias));
 			}
 
-			if(CommonConstants.evolveHyperNEATBias && !CommonConstants.substrateBiasLocationInputs && sub.getStype() != Substrate.INPUT_SUBSTRATE) {
+			if(CommonConstants.evolveHyperNEATBias && !CommonConstants.substrateBiasLocationInputs && sub.getStype() != Substrate.INPUT_SUBSTRATE
+					&& sub.getStype() != Substrate.ICOORDCONV_SUBSTRATE && sub.getStype() != Substrate.JCOORDCONV_SUBSTRATE) {
 				// Each non-input substrate has its own bias output for generating bias values,
 				// unless substrateBiasLocationInputs is true, in which case the CPPN inputs differentiate
 				// the output value of a single CPPN output for defining bias values.

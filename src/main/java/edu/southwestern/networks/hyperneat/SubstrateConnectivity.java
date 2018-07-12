@@ -9,7 +9,6 @@ import edu.southwestern.parameters.Parameters;
 public class SubstrateConnectivity {
 	public static final int CTYPE_FULL = 0;
 	public static final int CTYPE_CONVOLUTION = 1;
-	public static final int CTYPE_COORDCONV = 2;
 	public String sourceSubstrateName;
 	public String targetSubstrateName;
 	public int receptiveFieldWidth;
@@ -25,17 +24,11 @@ public class SubstrateConnectivity {
 	 */
 	public SubstrateConnectivity (String sourceSubstrateName, String targetSubstrateName, int connectivityType) {
 		this(sourceSubstrateName, targetSubstrateName, connectivityType, 
-				connectivityType != SubstrateConnectivity.CTYPE_FULL ? Parameters.parameters.integerParameter("receptiveFieldWidth") : -1,
-				connectivityType != SubstrateConnectivity.CTYPE_FULL ? Parameters.parameters.integerParameter("receptiveFieldHeight") : -1);		
+				connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION ? Parameters.parameters.integerParameter("receptiveFieldWidth") : -1,
+				connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION ? Parameters.parameters.integerParameter("receptiveFieldHeight") : -1);		
 	}
 	
-	/**
-	 * This assumes the creation of a convolutional substrate connectivity not coord conv
-	 * @param sourceSubstrateName
-	 * @param targetSubstrateName
-	 * @param receptiveFieldWidth
-	 * @param receptiveFieldHeight
-	 */
+
 	public SubstrateConnectivity (String sourceSubstrateName, String targetSubstrateName, int receptiveFieldWidth, int receptiveFieldHeight) {
 		this(sourceSubstrateName, targetSubstrateName, receptiveFieldWidth > 0 && receptiveFieldHeight > 0 ? CTYPE_CONVOLUTION : CTYPE_FULL, receptiveFieldWidth, receptiveFieldHeight);
 	}

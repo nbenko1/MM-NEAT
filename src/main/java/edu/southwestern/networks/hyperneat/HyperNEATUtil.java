@@ -8,6 +8,7 @@ import java.util.List;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.evolution.genotypes.HyperNEATCPPNGenotype;
 import edu.southwestern.networks.ActivationFunctions;
+import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.datastructures.Pair;
@@ -376,10 +377,12 @@ public class HyperNEATUtil {
 			int numCoordConvConnections = 0;
 			if (Parameters.parameters.booleanParameter("useCoordConv")) {
 				assert CommonConstants.convolution;
+				HashSet<String> countedSubstrates = new HashSet<String>();
 				List<SubstrateConnectivity> substrateConnectivities = hnt.getSubstrateConnectivity();
 				for(SubstrateConnectivity substrateConnectivity: substrateConnectivities) {
-					if(substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_COORDCONV) {
-						numCoordConvConnections += substrateConnectivity.receptiveFieldHeight * substrateConnectivity.receptiveFieldWidth;
+					if (substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION && !countedSubstrates.contains(substrateConnectivity.sourceSubstrateName)) {
+						countedSubstrates.add(substrateConnectivity.sourceSubstrateName);
+						numCoordConvConnections++;
 					}
 				}
 			}
@@ -446,13 +449,17 @@ public class HyperNEATUtil {
 	 * @param connections the list of connections that will have the connections to new coordConv substrates added to it
 	 * @param numInputSubstrates the number of input substrates that are defined for this task
 	 */
-	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, int numInputSubstrates) {
+	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, HyperNEATTask hnt) {
 		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 		assert(!CommonConstants.substrateLocationInputs);
+		List<String> inputNames = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1;
+		int numInputSubstrates = inputNames.size();
 		//hash set of (size of sub, layer of sub) objects. Tracks whether or not this size/layer combo has been added to the sub list
 		HashSet<Pair<Pair<Integer, Integer>, Integer>> coordConvSubSizeAndLayer = new HashSet<Pair<Pair<Integer, Integer>, Integer>>();
 		int numCoordConvSubstratesAdded = 0;
-		for(SubstrateConnectivity substrateConnectivity: connections) {
+		int connectionsSize = connections.size();
+		for(int i = 0; i < connectionsSize; i++) {
+			SubstrateConnectivity substrateConnectivity = connections.get(i);
 			if(substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
 				Substrate sourceSubstrate = getSubstrateFromName(substrates, substrateConnectivity.sourceSubstrateName);
 				Pair<Integer, Integer> sourceSubstrateSize = sourceSubstrate.getSize();
@@ -476,15 +483,15 @@ public class HyperNEATUtil {
 					coordConvSubSizeAndLayer.add(sizeAndLayer);
 					numCoordConvSubstratesAdded += 2;
 				}
-				connections.add(new SubstrateConnectivity(iCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_COORDCONV));
-				connections.add(new SubstrateConnectivity(jCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_COORDCONV));
+				connections.add(new SubstrateConnectivity(iCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
+				connections.add(new SubstrateConnectivity(jCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
 			}
 		}
 	}
 
 	public static Substrate getSubstrateFromName(List<Substrate> substrates, String name) {
 		for(Substrate substrate: substrates) {
-			if(substrate.getName() == name) {
+			if(substrate.getName().equals(name)) {
 				return substrate;
 			}
 		}
