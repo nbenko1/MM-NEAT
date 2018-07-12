@@ -1,6 +1,7 @@
 package edu.southwestern.networks.hyperneat;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class HyperNEATUtil {
 		return hnt;
 	}
 
-	
-	
+
+
 	public static int numBiasOutputsNeeded() {
 		return numBiasOutputsNeeded(getHyperNEATTask());
 	}
@@ -44,7 +45,7 @@ public class HyperNEATUtil {
 	public static int numBiasOutputsNeeded(HyperNEATTask hnt) {
 		// CPPN has no bias outputs if they are not being evolved
 		if(!CommonConstants.evolveHyperNEATBias) return 0;
-		
+
 		// If substrate coordinates are inputs to the CPPN, then
 		// biases on difference substrates can be different based on the
 		// inputs rather than having separate outputs for each substrate.
@@ -284,7 +285,7 @@ public class HyperNEATUtil {
 	public static List<SubstrateConnectivity> getSubstrateConnectivity(int numInputSubstrates, int processWidth, int processDepth, List<String> outputNames){
 		return getSubstrateConnectivity(numInputSubstrates, processWidth, processDepth, outputNames, Parameters.parameters.booleanParameter("extraHNLinks"));
 	}
-	
+
 	/**
 	 * Generalizes the creation of HyperNEAT Substrates
 	 * 
@@ -368,12 +369,16 @@ public class HyperNEATUtil {
 	 */
 	public static int numCPPNOutputs() {
 		HyperNEATTask hnt = HyperNEATUtil.getHyperNEATTask();
+
+
+		// TODO: Add special case for coord conv so that if MSS is used (NOT substrateLocationInputs) then output neurons are added to the CPPN
+
 		if(CommonConstants.substrateLocationInputs) {
 			// All substrate pairings use the same outputs
 			return HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair + HyperNEATUtil.numBiasOutputsNeeded();
 		} else {
 			// Each substrate pairing has a separate set of outputs
-			int numSubstratePairings = hnt.getSubstrateConnectivity().size();
+			int numSubstratePairings = hnt.getSubstrateConnectivity().size(); // TODO: Getting this information from the task could be a problem if we ever evolve the architectures too.
 			return numSubstratePairings * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair + HyperNEATUtil.numBiasOutputsNeeded();
 		}
 	}
@@ -427,5 +432,48 @@ public class HyperNEATUtil {
 			}
 		}
 		return outputCount;
+	}
+
+	/**
+	 * Adds the x/y coordinates as inputs into each hyperNEAT substrate 
+	 * @param substrates the list of substrates that will have coordConv substrates added to it
+	 * @param connections the list of connections that will have the connections to new coordConv substrates added to it
+	 * @param numInputSubstrates the number of input substrates that are defined for this task
+	 */
+	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, int numInputSubstrates) {
+		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
+		assert(!CommonConstants.substrateLocationInputs);
+		//hash set of (size of sub, layer of sub) objects. Tracks whether or not this size/layer combo has been added to the sub list
+		HashSet<Pair<Pair<Integer, Integer>, Integer>> coordConvSubSizeAndLayer = new HashSet<Pair<Pair<Integer, Integer>, Integer>>();
+		int numCoordConvSubstratesAdded = 0;
+		for(SubstrateConnectivity substrateConnectivity: connections) {
+			if(substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
+				Substrate sourceSubstrate = null;
+				for(Substrate substrate: substrates) {
+					if(substrate.getName() == substrateConnectivity.sourceSubstrateName) {
+						sourceSubstrate = substrate;
+						break;
+					}
+				}
+				assert sourceSubstrate != null;
+				Pair<Integer, Integer> sourceSubstrateSize = sourceSubstrate.getSize();
+				int substrateLayer = sourceSubstrate.getSubLocation().t2; //layer and y location are equivalent
+				//this is also equivalent to the location in the substrate list that the new coordConvSubstrate will be added
+				int coordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded; 
+				String coordConvName = "coordConv(" + coordConvXCoordinate + ",0)";
+				Pair<Pair<Integer, Integer>, Integer> sizeAndLayer = new Pair<Pair<Integer, Integer>, Integer>(sourceSubstrateSize, substrateLayer);
+				if (!coordConvSubSizeAndLayer.contains(sizeAndLayer)) {
+					//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
+					Triple<Integer, Integer, Integer> coordConvNewSubLocation = new Triple<Integer, Integer, Integer>(coordConvXCoordinate, 0, 0);
+					//are these the correct parameters?
+					Substrate coordConvSubstrate = new Substrate(sourceSubstrateSize, Substrate.PROCCESS_SUBSTRATE, coordConvNewSubLocation,
+							coordConvName, ActivationFunctions.FTYPE_ID);
+					substrates.add(coordConvXCoordinate, coordConvSubstrate);
+					coordConvSubSizeAndLayer.add(sizeAndLayer);
+					numCoordConvSubstratesAdded++;
+				}
+				connections.add(new SubstrateConnectivity(coordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
+			}
+		}
 	}
 }

@@ -691,6 +691,7 @@ public class Parameters {
 		booleanOptions.add("tugObjectiveUsageLinkage", false, "In TUG, when modes and objectives are linked, linkage depends on mode usage");
 		booleanOptions.add("tugResetsToPreviousGoals", false, "On TUG goal increase, reset RWAs to previous goals");
 		booleanOptions.add("ucb1Evaluation", false, "Use UCB1 to decide which individuals get extra evaluations");
+		booleanOptions.add("useCoordConv", false, "coord conv adds the x/y coordinates as inputs into each hyperNEAT substrate");
 		booleanOptions.add("useHyperNEATCustomArchitecture", false, "allows for hyperNEAT custom architectures");
 		booleanOptions.add("useTetrisLinesBDCharacterization", false, "turns on tetris characterization vector for 1, 2, 3, or 4 lines cleared");
 		booleanOptions.add("utJumps", true, "UT2004 agent can jump");
