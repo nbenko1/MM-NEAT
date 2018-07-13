@@ -118,7 +118,7 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	@Override
 	public TWEANN getPhenotype() {
 		TWEANNGenotype tg = getSubstrateGenotype((HyperNEATTask) MMNEAT.task) ;
-		TWEANN result = tg.getPhenotype();//return call to substrate genotype
+		TWEANN result = tg.getPhenotype(); //return call to substrate genotype
 		result.passSubstrateInformation(getSubstrateInformation((HyperNEATTask) MMNEAT.task));
 		return result;
 	}
@@ -142,7 +142,8 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		TWEANN cppn = getCPPN();// CPPN used to create TWEANN network
 		List<Substrate> subs = getSubstrateInformation(hnt);// extract substrate information from domain
 		List<SubstrateConnectivity> connections = getSubstrateConnectivity(hnt);// extract substrate connectivity from domain
-
+		
+		System.out.println("in here");
 		if (Parameters.parameters.booleanParameter("useCoordConv")) {
 			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, hnt);
 		}
@@ -208,7 +209,6 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	 */
 	public List<Substrate> getSubstrateInformation(HyperNEATTask HNTask) {
 		return HNTask.getSubstrateInformation();
-
 	}
 
 	/**
@@ -274,7 +274,16 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		if(CommonConstants.substrateLocationInputs) {
 			return HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
 		} else {
-			return getSubstrateConnectivity(hnt).size() * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
+			List<SubstrateConnectivity> substrateConnectivities = getSubstrateConnectivity(hnt);
+			List<Substrate> substrates = getSubstrateInformation(hnt);
+			int numSubstratesBeforeBiases = 0;
+			for (SubstrateConnectivity substrateConnectivity: substrateConnectivities) {
+				Substrate substrate = HyperNEATUtil.getSubstrateFromName(substrates, substrateConnectivity.sourceSubstrateName);
+				if(substrate.getStype() != Substrate.ICOORDCONV_SUBSTRATE && substrate.getStype() != Substrate.JCOORDCONV_SUBSTRATE) {
+					numSubstratesBeforeBiases++;
+				}
+			}
+			return numSubstratesBeforeBiases * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
 		}
 	}
 
@@ -347,7 +356,7 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 						System.out.println("biasIndex: " + biasIndex);
 						System.out.println("CommonConstants.evolveHyperNEATBias: " + CommonConstants.evolveHyperNEATBias);
 						System.out.println("numCPPNOutputsPerLayerPair: " + numCPPNOutputsPerLayerPair);
-						System.out.println("numBiasOutputsNeeded(hnt): " + numBiasOutputsNeeded(hnt));
+						System.out.println("numBiasOutputsNeeded(hnt): " + HyperNEATUtil.numBiasOutputsNeeded(hnt));
 						System.out.println("cppn.numInputs(): " + cppn.numInputs());
 						System.out.println("cppn.numOutputs(): " + cppn.numOutputs());
 						System.out.println("cppn.effectiveNumOutputs(): " + cppn.effectiveNumOutputs());
@@ -389,29 +398,6 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	 */
 	public NodeGene newSubstrateNodeGene(Substrate sub, double bias) {
 		return newNodeGene(sub.getFtype(), sub.getStype(), innovationID++, false, bias, normalizedNodeMemory);
-	}
-
-	/**
-	 * If HyperNEAT neuron bias values are evolved, then this method determines
-	 * how many CPPN outputs are needed to specify them: 1 per non-input substrate layer.
-	 * @param hnt HyperNEATTask that specifies substrate connectivity
-	 * @return number of bias outputs needed by CPPN
-	 */
-	public int numBiasOutputsNeeded(HyperNEATTask hnt) {
-		// CPPN has no bias outputs if they are not being evolved
-		if(!CommonConstants.evolveHyperNEATBias) return 0;
-
-		// If substrate coordinates are inputs to the CPPN, then
-		// biases on difference substrates can be different based on the
-		// inputs rather than having separate outputs for each substrate.
-		if(CommonConstants.substrateBiasLocationInputs) return 1;
-
-		List<Substrate> subs = getSubstrateInformation(hnt);
-		int count = 0;
-		for(Substrate s : subs) {
-			if(s.getStype() != Substrate.INPUT_SUBSTRATE) count++;
-		}
-		return count;
 	}
 
 	/**

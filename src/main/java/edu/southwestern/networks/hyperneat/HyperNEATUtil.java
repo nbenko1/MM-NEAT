@@ -55,7 +55,7 @@ public class HyperNEATUtil {
 		List<Substrate> subs = hnt.getSubstrateInformation();
 		int count = 0;
 		for(Substrate s : subs) {
-			if(s.getStype() != Substrate.INPUT_SUBSTRATE) count++;
+			if(s.getStype() == Substrate.PROCCESS_SUBSTRATE || s.getStype() == Substrate.OUTPUT_SUBSTRATE) count++;
 		}
 		return count;
 	}
@@ -452,12 +452,16 @@ public class HyperNEATUtil {
 	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, HyperNEATTask hnt) {
 		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 		assert(!CommonConstants.substrateLocationInputs);
+
+		//TODO: move this to genotype. pass int
 		List<String> inputNames = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1;
 		int numInputSubstrates = inputNames.size();
-		//hash set of (size of sub, layer of sub) objects. Tracks whether or not this size/layer combo has been added to the sub list
-		HashSet<Pair<Pair<Integer, Integer>, Integer>> coordConvSubSizeAndLayer = new HashSet<Pair<Pair<Integer, Integer>, Integer>>();
-		int numCoordConvSubstratesAdded = 0;
-		int connectionsSize = connections.size();
+		//hash map of (size of sub, layer of sub) objects to (iCoordConvName, jCoordConvName) strings. 
+		//Contains a size/layer combo if it has been added to the substrates list. If this combo has been added to the substrate list then this hashmap allows retrieval of its coord conv names
+		HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>> coordConvSubSizeAndLayerToIAndJNames = new HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>>();
+		int numCoordConvSubstratesAdded = 0; //this is for determining the location in vector space of each coord conv
+		int coordConvSubstrateNameIndex = 0; //increments after the addition of the i and j coord convs
+		int connectionsSize = connections.size(); //required to be separate from the for loop because we are adding to connections within the loop
 		for(int i = 0; i < connectionsSize; i++) {
 			SubstrateConnectivity substrateConnectivity = connections.get(i);
 			if(substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
@@ -467,10 +471,16 @@ public class HyperNEATUtil {
 				//this is also equivalent to the location in the substrate list that the new coordConvSubstrate will be added
 				int iCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded;
 				int jCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded + 1;
-				String iCoordConvName = "iCoordConv(" + iCoordConvXCoordinate + ",0)";
-				String jCoordConvName = "jCoordConv(" + jCoordConvXCoordinate + ",0)";
+				String iCoordConvName;
+				String jCoordConvName;
 				Pair<Pair<Integer, Integer>, Integer> sizeAndLayer = new Pair<Pair<Integer, Integer>, Integer>(sourceSubstrateSize, substrateLayer);
-				if (!coordConvSubSizeAndLayer.contains(sizeAndLayer)) {
+				if (coordConvSubSizeAndLayerToIAndJNames.containsKey(sizeAndLayer)) {
+					Pair<String, String> CoordConvSourceNamesToConnect = coordConvSubSizeAndLayerToIAndJNames.get(sizeAndLayer);
+					iCoordConvName = CoordConvSourceNamesToConnect.t1;
+					jCoordConvName = CoordConvSourceNamesToConnect.t2;
+				} else {
+					iCoordConvName = "iCoordConv(" + coordConvSubstrateNameIndex + ",0)";
+					jCoordConvName = "jCoordConv(" + coordConvSubstrateNameIndex + ",0)";
 					//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 					Triple<Integer, Integer, Integer> iCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(iCoordConvXCoordinate, 0, 0);
 					Triple<Integer, Integer, Integer> jCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(jCoordConvXCoordinate, 0, 0);
@@ -480,11 +490,21 @@ public class HyperNEATUtil {
 							jCoordConvName, ActivationFunctions.FTYPE_ID);
 					substrates.add(iCoordConvXCoordinate, iCoordConvSubstrate);
 					substrates.add(jCoordConvXCoordinate, jCoordConvSubstrate);
-					coordConvSubSizeAndLayer.add(sizeAndLayer);
+					coordConvSubSizeAndLayerToIAndJNames.put(sizeAndLayer, new Pair<String, String>(iCoordConvName, jCoordConvName));
 					numCoordConvSubstratesAdded += 2;
+					coordConvSubstrateNameIndex++;
 				}
-				connections.add(new SubstrateConnectivity(iCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
-				connections.add(new SubstrateConnectivity(jCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
+				boolean previouslyAdded = false;
+				for(SubstrateConnectivity connection: connections) {
+					if(connection.sourceSubstrateName.equals(iCoordConvName) && connection.targetSubstrateName.equals(substrateConnectivity.targetSubstrateName)) {
+						previouslyAdded = true;
+						break;
+					}
+				}
+				if (!previouslyAdded) {
+					connections.add(new SubstrateConnectivity(iCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
+					connections.add(new SubstrateConnectivity(jCoordConvName, substrateConnectivity.targetSubstrateName, SubstrateConnectivity.CTYPE_CONVOLUTION));
+				}
 			}
 		}
 	}

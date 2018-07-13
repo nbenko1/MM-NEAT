@@ -391,7 +391,7 @@ public class HyperNEATCPPNGenotypeTest {
 		HyperNEATTetrisTask.hardSubstrateReset();
 		EvolutionaryHistory.archetypes = null;
 		EvolutionaryHistory.setInnovation(0l);
-		Parameters.initializeParameterCollections(new String[] {"useCoordConv:true", "runNumber:1", "randomSeed:1", "trials:3", "maxGens:500", "mu:50", "io:false", "netio:false", "mating:true", "task:edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask", "rlGlueEnvironment:org.rlcommunity.environments.tetris.Tetris", "rlGlueExtractor:edu.southwestern.tasks.rlglue.featureextractors.tetris.RawTetrisStateExtractor", "tetrisTimeSteps:true", "tetrisBlocksOnScreen:false", "rlGlueAgent:edu.southwestern.tasks.rlglue.tetris.TetrisAfterStateAgent", "splitRawTetrisInputs:true", "senseHolesDifferently:true", "hyperNEAT:true", "genotype:edu.southwestern.evolution.genotypes.HyperNEATCPPNAndSubstrateArchitectureGenotype", "allowMultipleFunctions:true", "ftype:1", "netChangeActivationRate:0.3", "substrateMapping:edu.southwestern.networks.hyperneat.BottomSubstrateMapping", "steps:500000", "perLinkMutateRate:0.05", "netLinkRate:0.4", "netSpliceRate:0.2", "crossoverRate:0.5", "extraHNLinks:false", "HNProcessDepth:1", "HNProcessWidth:1", "convolution:false", "senseTetrisHolesAsPositive:true", "convolution:true"});
+		Parameters.initializeParameterCollections(new String[] {"evolveHyperNEATBias:true", "useCoordConv:true", "runNumber:1", "randomSeed:1", "trials:3", "maxGens:500", "mu:50", "io:false", "netio:false", "mating:true", "task:edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask", "rlGlueEnvironment:org.rlcommunity.environments.tetris.Tetris", "rlGlueExtractor:edu.southwestern.tasks.rlglue.featureextractors.tetris.RawTetrisStateExtractor", "tetrisTimeSteps:true", "tetrisBlocksOnScreen:false", "rlGlueAgent:edu.southwestern.tasks.rlglue.tetris.TetrisAfterStateAgent", "splitRawTetrisInputs:true", "senseHolesDifferently:true", "hyperNEAT:true", "genotype:edu.southwestern.evolution.genotypes.HyperNEATCPPNAndSubstrateArchitectureGenotype", "allowMultipleFunctions:true", "ftype:1", "netChangeActivationRate:0.3", "substrateMapping:edu.southwestern.networks.hyperneat.BottomSubstrateMapping", "steps:500000", "perLinkMutateRate:0.05", "netLinkRate:0.4", "netSpliceRate:0.2", "crossoverRate:0.5", "extraHNLinks:false", "HNProcessDepth:1", "HNProcessWidth:1", "convolution:false", "senseTetrisHolesAsPositive:true", "convolution:true"});
 		MMNEAT.loadClasses();
 		EvolutionaryHistory.initArchetype(0);
 		
@@ -400,27 +400,62 @@ public class HyperNEATCPPNGenotypeTest {
 		
 		assertEquals(hncg.getCPPN().numOutputs(), 7);
 		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 7);
-		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 2 + 1); 
+		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 + 1); 
 		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
-		assertEquals(substrateConnectivities.size(), 6);
+		assertEquals(substrateConnectivities.size(), 5);
 		assertEquals(substrateConnectivities.get(0).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
 		assertEquals(substrateConnectivities.get(1).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
-		assertEquals(substrateConnectivities.get(2).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(2).connectivityType, SubstrateConnectivity.CTYPE_FULL);
 		assertEquals(substrateConnectivities.get(3).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
 		assertEquals(substrateConnectivities.get(4).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
-		assertEquals(substrateConnectivities.get(5).connectivityType, SubstrateConnectivity.CTYPE_FULL); 
-		assertEquals(8 * 18 * 3 * 3 * 2 + 8 * 18, hncg.getSubstrateGenotype(hnt).numLinks(false), 0.0);
+		//assertEquals(8 * 18 * 4 * 9 + 8 * 18, hncg.getSubstrateGenotype(hnt).numLinks(false), 0.0);
 		List<Substrate> substrates = hncg.getSubstrateInformation(hnt);
-		assertEquals(substrates.size(), 10);
+		assertEquals(substrates.size(), 6);
 		assertEquals(substrates.get(0).getStype(), Substrate.INPUT_SUBSTRATE);
 		assertEquals(substrates.get(1).getStype(), Substrate.INPUT_SUBSTRATE);
-		assertEquals(substrates.get(2).getStype(), Substrate.PROCCESS_SUBSTRATE);
-		assertEquals(substrates.get(3).getStype(), Substrate.OUTPUT_SUBSTRATE);
-		assertEquals(substrates.get(4).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
-		assertEquals(substrates.get(5).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
-		assertEquals(substrates.get(6).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
-		assertEquals(substrates.get(7).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
-		assertEquals(substrates.get(8).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
-		assertEquals(substrates.get(9).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(2).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(3).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(4).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(5).getStype(), Substrate.OUTPUT_SUBSTRATE);
+	}
+	
+	//@Test
+	public void testCoordConvD1W2() {
+		MMNEAT.clearClasses();
+		HyperNEATTetrisTask.hardSubstrateReset();
+		EvolutionaryHistory.archetypes = null;
+		EvolutionaryHistory.setInnovation(0l);
+		Parameters.initializeParameterCollections(new String[] {"evolveHyperNEATBias:true", "useCoordConv:true", "runNumber:1", "randomSeed:1", "trials:3", "maxGens:500", "mu:50", "io:false", "netio:false", "mating:true", "task:edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask", "rlGlueEnvironment:org.rlcommunity.environments.tetris.Tetris", "rlGlueExtractor:edu.southwestern.tasks.rlglue.featureextractors.tetris.RawTetrisStateExtractor", "tetrisTimeSteps:true", "tetrisBlocksOnScreen:false", "rlGlueAgent:edu.southwestern.tasks.rlglue.tetris.TetrisAfterStateAgent", "splitRawTetrisInputs:true", "senseHolesDifferently:true", "hyperNEAT:true", "genotype:edu.southwestern.evolution.genotypes.HyperNEATCPPNAndSubstrateArchitectureGenotype", "allowMultipleFunctions:true", "ftype:1", "netChangeActivationRate:0.3", "substrateMapping:edu.southwestern.networks.hyperneat.BottomSubstrateMapping", "steps:500000", "perLinkMutateRate:0.05", "netLinkRate:0.4", "netSpliceRate:0.2", "crossoverRate:0.5", "extraHNLinks:false", "HNProcessDepth:1", "HNProcessWidth:2", "convolution:false", "senseTetrisHolesAsPositive:true", "convolution:true"});
+		MMNEAT.loadClasses();
+		EvolutionaryHistory.initArchetype(0);
+		
+		HyperNEATCPPNGenotype hncg = new HyperNEATCPPNGenotype();
+		HyperNEATTask hnt = (HyperNEATTask) MMNEAT.task;
+		
+		assertEquals(hncg.getCPPN().numOutputs(), 13);
+		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 13);
+		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 2 + 1); 
+		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
+		assertEquals(substrateConnectivities.size(), 10);
+		assertEquals(substrateConnectivities.get(0).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(1).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(2).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(3).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(4).connectivityType, SubstrateConnectivity.CTYPE_FULL);
+		assertEquals(substrateConnectivities.get(5).connectivityType, SubstrateConnectivity.CTYPE_FULL);
+		assertEquals(substrateConnectivities.get(6).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(7).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(8).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(9).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		//assertEquals(, hncg.getSubstrateGenotype(hnt).numLinks(false), 0.0);
+		List<Substrate> substrates = hncg.getSubstrateInformation(hnt);
+		assertEquals(substrates.size(), 7);
+		assertEquals(substrates.get(0).getStype(), Substrate.INPUT_SUBSTRATE);
+		assertEquals(substrates.get(1).getStype(), Substrate.INPUT_SUBSTRATE);
+		assertEquals(substrates.get(2).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(3).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(4).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(5).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(6).getStype(), Substrate.OUTPUT_SUBSTRATE);
 	}
 }
