@@ -87,7 +87,7 @@ public class HyperNEATCPPNGenotypeTest {
 	 * Weights from a given receptive field should be the same for all target
 	 * neurons in the same feature substrate.
 	 */
-	//@Test
+	@Test
 	public void testConvolutionalWeightSharing() {
 		HyperNEATTetrisTask.hardSubstrateReset();
 		Parameters.initializeParameterCollections(new String[] { "io:false", "netio:false", "recurrency:false", "hyperNEAT:true", 
@@ -225,7 +225,7 @@ public class HyperNEATCPPNGenotypeTest {
 	 * Tests creation of list of nodes in substrates. Order of substrates is not
 	 * important as long as mapping is accurate
 	 */
-	//@Test
+	@Test
 	public void testCreateSubstrateNodesSlow() {
 		ArrayList<NodeGene> nodes = hcppn.createSubstrateNodes((HyperNEATTask) MMNEAT.task,  hcppn.getCPPN(), subs, 2, 1);
 		//Asserts that the size of the array list created is equal to the sum of the areas of the two substrates
@@ -244,7 +244,7 @@ public class HyperNEATCPPNGenotypeTest {
 	 * Tests looping through the two substrates to be connected and setting
 	 * those connections
 	 */
-	//@Test
+	@Test
 	public void testLoopThroughLinks() {
 		int indexOfTest = 0;
 		ArrayList<LinkGene> newLinks = new ArrayList<LinkGene>();
@@ -280,7 +280,7 @@ public class HyperNEATCPPNGenotypeTest {
 	 * Checks to make sure get phenotype returns the created network and that
 	 * the getCPPN returns the cppn used
 	 */
-	//@Test
+	@Test
 	public void testGetPhenotype()  {
 		hcppn.getPhenotype();
 		assertTrue(!hcppn.getPhenotype().equals(hcppn.getCPPN()));
@@ -289,7 +289,7 @@ public class HyperNEATCPPNGenotypeTest {
 	/**
 	 * Tests that the hash mapping is correct
 	 */
-	//@Test
+	@Test
 	public void testHashMapping() {
 		assertTrue(sIMap.get(subs.get(sub1Index).getName()).equals(sub1Index));
 	}
@@ -297,7 +297,7 @@ public class HyperNEATCPPNGenotypeTest {
 	/**
 	 * tests link expression calculation works
 	 */
-	//@Test
+	@Test
 	public void testLinkExpressionThreshold() {
 		// This particular test needs the default expression threshold to work
 		CommonConstants.linkExpressionThreshold = 0.2;
@@ -315,7 +315,7 @@ public class HyperNEATCPPNGenotypeTest {
 	/**
 	 * Tests that leo is used correctly
 	 */
-	//@Test
+	@Test
 	public void testLeo() {
 		//System.out.println("\t\tRESET!");
 		MMNEAT.clearClasses();
@@ -350,7 +350,7 @@ public class HyperNEATCPPNGenotypeTest {
 	/**
 	 * Tests that the biases are inserted correctly
 	 */
-	//@Test
+	@Test
 	public void testBias() { 
 		MMNEAT.clearClasses();
 		Parameters.initializeParameterCollections(new String[] { "io:false", "netio:false", "recurrency:false",
@@ -385,7 +385,7 @@ public class HyperNEATCPPNGenotypeTest {
 		}
 	}
 	
-	//@Test
+	@Test
 	public void testCoordConv() {
 		MMNEAT.clearClasses();
 		HyperNEATTetrisTask.hardSubstrateReset();
@@ -401,6 +401,8 @@ public class HyperNEATCPPNGenotypeTest {
 		assertEquals(hncg.getCPPN().numOutputs(), 7);
 		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 7);
 		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 + 1); 
+		assertEquals(hncg.getCPPN().numOutputs(), 7);
+		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 7);
 		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
 		assertEquals(substrateConnectivities.size(), 5);
 		assertEquals(substrateConnectivities.get(0).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
@@ -434,8 +436,7 @@ public class HyperNEATCPPNGenotypeTest {
 		
 		assertEquals(hncg.getCPPN().numOutputs(), 13);
 		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 13);
-		hncg.getPhenotype();
-		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 2 + 1); 
+		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 2 + 1);
 		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
 		assertEquals(substrateConnectivities.size(), 10);
 		assertEquals(substrateConnectivities.get(0).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
@@ -458,5 +459,56 @@ public class HyperNEATCPPNGenotypeTest {
 		assertEquals(substrates.get(4).getStype(), Substrate.PROCCESS_SUBSTRATE);
 		assertEquals(substrates.get(5).getStype(), Substrate.PROCCESS_SUBSTRATE);
 		assertEquals(substrates.get(6).getStype(), Substrate.OUTPUT_SUBSTRATE);
+	}
+	
+	@Test
+	public void testCoordConvD2W2() {
+		MMNEAT.clearClasses();
+		HyperNEATTetrisTask.hardSubstrateReset();
+		EvolutionaryHistory.archetypes = null;
+		EvolutionaryHistory.setInnovation(0l);
+		Parameters.initializeParameterCollections(new String[] {"evolveHyperNEATBias:true", "useCoordConv:true", "runNumber:1", "randomSeed:1", "trials:3", "maxGens:500", "mu:50", "io:false", "netio:false", "mating:true", "task:edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask", "rlGlueEnvironment:org.rlcommunity.environments.tetris.Tetris", "rlGlueExtractor:edu.southwestern.tasks.rlglue.featureextractors.tetris.RawTetrisStateExtractor", "tetrisTimeSteps:true", "tetrisBlocksOnScreen:false", "rlGlueAgent:edu.southwestern.tasks.rlglue.tetris.TetrisAfterStateAgent", "splitRawTetrisInputs:true", "senseHolesDifferently:true", "hyperNEAT:true", "genotype:edu.southwestern.evolution.genotypes.HyperNEATCPPNAndSubstrateArchitectureGenotype", "allowMultipleFunctions:true", "ftype:1", "netChangeActivationRate:0.3", "substrateMapping:edu.southwestern.networks.hyperneat.BottomSubstrateMapping", "steps:500000", "perLinkMutateRate:0.05", "netLinkRate:0.4", "netSpliceRate:0.2", "crossoverRate:0.5", "extraHNLinks:false", "HNProcessDepth:2", "HNProcessWidth:2", "convolution:false", "senseTetrisHolesAsPositive:true", "convolution:true"});
+		MMNEAT.loadClasses();
+		EvolutionaryHistory.initArchetype(0);
+		
+		HyperNEATCPPNGenotype hncg = new HyperNEATCPPNGenotype();
+		HyperNEATTask hnt = (HyperNEATTask) MMNEAT.task;
+		
+		assertEquals(hncg.getCPPN().numOutputs(), 23);
+		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 23);
+		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 4 + 6 * 16 * 2 + 1);
+		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
+		assertEquals(substrateConnectivities.size(), 18);
+		assertEquals(substrateConnectivities.get(0).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(1).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(2).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(3).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(4).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(5).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(6).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(7).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(8).connectivityType, SubstrateConnectivity.CTYPE_FULL); 
+		assertEquals(substrateConnectivities.get(9).connectivityType, SubstrateConnectivity.CTYPE_FULL);
+		assertEquals(substrateConnectivities.get(10).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(11).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(12).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION); 
+		assertEquals(substrateConnectivities.get(13).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(14).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(15).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(16).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		assertEquals(substrateConnectivities.get(17).connectivityType, SubstrateConnectivity.CTYPE_CONVOLUTION);
+		List<Substrate> substrates = hncg.getSubstrateInformation(hnt);
+		assertEquals(substrates.size(), 11);
+		assertEquals(substrates.get(0).getStype(), Substrate.INPUT_SUBSTRATE);
+		assertEquals(substrates.get(1).getStype(), Substrate.INPUT_SUBSTRATE);
+		assertEquals(substrates.get(2).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(3).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(4).getStype(), Substrate.ICOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(5).getStype(), Substrate.JCOORDCONV_SUBSTRATE);
+		assertEquals(substrates.get(6).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(7).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(8).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(9).getStype(), Substrate.PROCCESS_SUBSTRATE);
+		assertEquals(substrates.get(10).getStype(), Substrate.OUTPUT_SUBSTRATE);
 	}
 }

@@ -144,7 +144,6 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		List<Substrate> subs = getSubstrateInformation(hnt);// extract substrate information from domain
 		List<SubstrateConnectivity> connections = getSubstrateConnectivity(hnt);// extract substrate connectivity from domain
 		
-		System.out.println("in here");
 		if (Parameters.parameters.booleanParameter("useCoordConv")) {
 			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1.size());
 		}
@@ -274,17 +273,26 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	public int indexFirstBiasOutput(HyperNEATTask hnt) {
 		if(CommonConstants.substrateLocationInputs) {
 			return HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
-		} else {
+		} else if (Parameters.parameters.booleanParameter("useCoordConv")) {
 			List<SubstrateConnectivity> substrateConnectivities = getSubstrateConnectivity(hnt);
 			List<Substrate> substrates = getSubstrateInformation(hnt);
 			int numSubstratesBeforeBiases = 0;
 			for (SubstrateConnectivity substrateConnectivity: substrateConnectivities) {
-				Substrate substrate = HyperNEATUtil.getSubstrateFromName(substrates, substrateConnectivity.sourceSubstrateName);
-				if(substrate.getStype() != Substrate.ICOORDCONV_SUBSTRATE && substrate.getStype() != Substrate.JCOORDCONV_SUBSTRATE) {
+				Substrate sourceSubstrate = null;
+				for(Substrate substrate: substrates) {
+					if(substrate.getName().equals(substrateConnectivity.sourceSubstrateName)) {
+						sourceSubstrate = substrate;
+						break;
+					}
+				}
+				assert sourceSubstrate != null;
+				if(sourceSubstrate.getStype() != Substrate.ICOORDCONV_SUBSTRATE && sourceSubstrate.getStype() != Substrate.JCOORDCONV_SUBSTRATE) {
 					numSubstratesBeforeBiases++;
 				}
 			}
 			return numSubstratesBeforeBiases * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
+		} else {
+			return getSubstrateConnectivity(hnt).size() * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair;
 		}
 	}
 
