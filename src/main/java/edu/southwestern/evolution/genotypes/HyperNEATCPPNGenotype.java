@@ -12,6 +12,7 @@ import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.HyperNEATUtil;
 import edu.southwestern.networks.hyperneat.Substrate;
 import edu.southwestern.networks.hyperneat.SubstrateConnectivity;
+import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.CartesianGeometricUtilities;
@@ -145,7 +146,7 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 		
 		System.out.println("in here");
 		if (Parameters.parameters.booleanParameter("useCoordConv")) {
-			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, hnt);
+			HyperNEATUtil.addCoordConvSubstrateAndConnections(subs, connections, FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1.size());
 		}
 
 		ArrayList<NodeGene> newNodes = null;

@@ -8,7 +8,6 @@ import java.util.List;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.evolution.genotypes.HyperNEATCPPNGenotype;
 import edu.southwestern.networks.ActivationFunctions;
-import edu.southwestern.networks.hyperneat.architecture.FlexibleSubstrateArchitecture;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.datastructures.Pair;
@@ -449,13 +448,9 @@ public class HyperNEATUtil {
 	 * @param connections the list of connections that will have the connections to new coordConv substrates added to it
 	 * @param numInputSubstrates the number of input substrates that are defined for this task
 	 */
-	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, HyperNEATTask hnt) {
+	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, int numInputSubstrates) {
 		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 		assert(!CommonConstants.substrateLocationInputs);
-
-		//TODO: move this to genotype. pass int
-		List<String> inputNames = FlexibleSubstrateArchitecture.getInputAndOutputNames(hnt).t1;
-		int numInputSubstrates = inputNames.size();
 		//hash map of (size of sub, layer of sub) objects to (iCoordConvName, jCoordConvName) strings. 
 		//Contains a size/layer combo if it has been added to the substrates list. If this combo has been added to the substrate list then this hashmap allows retrieval of its coord conv names
 		HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>> coordConvSubSizeAndLayerToIAndJNames = new HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>>();

@@ -385,7 +385,7 @@ public class HyperNEATCPPNGenotypeTest {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void testCoordConv() {
 		MMNEAT.clearClasses();
 		HyperNEATTetrisTask.hardSubstrateReset();
@@ -419,7 +419,7 @@ public class HyperNEATCPPNGenotypeTest {
 		assertEquals(substrates.get(5).getStype(), Substrate.OUTPUT_SUBSTRATE);
 	}
 	
-	//@Test
+	@Test
 	public void testCoordConvD1W2() {
 		MMNEAT.clearClasses();
 		HyperNEATTetrisTask.hardSubstrateReset();
@@ -434,6 +434,7 @@ public class HyperNEATCPPNGenotypeTest {
 		
 		assertEquals(hncg.getCPPN().numOutputs(), 13);
 		assertEquals(hncg.getCPPN().effectiveNumOutputs(), 13);
+		hncg.getPhenotype();
 		assertEquals(hncg.getPhenotype().nodes.size(), 10 * 20 * 4 + 8 * 18 * 2 + 1); 
 		List<SubstrateConnectivity> substrateConnectivities = hncg.getSubstrateConnectivity(hnt);
 		assertEquals(substrateConnectivities.size(), 10);
