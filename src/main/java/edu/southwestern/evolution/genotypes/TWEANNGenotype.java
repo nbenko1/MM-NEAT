@@ -11,6 +11,7 @@ import edu.southwestern.networks.TWEANN;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.CartesianGeometricUtilities;
+import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.datastructures.ArrayUtil;
 import edu.southwestern.util.random.RandomGenerator;
 import edu.southwestern.util.random.RandomNumbers;
@@ -499,7 +500,6 @@ public class TWEANNGenotype implements NetworkGenotype<TWEANN> {
 			boolean standardMultitask, boolean hierarchicalMultitask, int archetypeIndex) {
 
 		assert neuronsPerModule > 0 : "Cannot have 0 neurons in a module!";
-
 		this.archetypeIndex = archetypeIndex;
 		this.nodes = nodes;
 		this.links = links;

@@ -52,12 +52,24 @@ public class MiscUtil {
 	public static void waitForReadStringAndEnterKeyPress(Object msg) {
 		System.out.println("\nmessage: " + msg);
 		System.out.println("\nwaiting here:");
+		printStackTrace();
+		waitForReadStringAndEnterKeyPress();
+	}
+	
+	public static void printStackTrace(Object message) {
+		System.out.println("\nmessage: " + message);
+		printStackTrace();
+	}
+	
+	/**
+	 * prints the stack trace, does not pause
+	 */
+	public static void printStackTrace() {
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-		for (int i = 1; i < elements.length; i++) {
+		for (int i = 2; i < elements.length; i++) {
 			StackTraceElement s = elements[i];
 			System.out.println("\tat " + s.getClassName() + "." + s.getMethodName()
 			+ "(" + s.getFileName() + ":" + s.getLineNumber() + ")");
 		}
-		waitForReadStringAndEnterKeyPress();
 	}
 }

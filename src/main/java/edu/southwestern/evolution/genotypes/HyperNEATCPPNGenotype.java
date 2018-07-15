@@ -8,6 +8,7 @@ import java.util.List;
 import edu.southwestern.MMNEAT.MMNEAT;
 import edu.southwestern.networks.NetworkUtil;
 import edu.southwestern.networks.TWEANN;
+import edu.southwestern.networks.TWEANN.Node;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.HyperNEATUtil;
 import edu.southwestern.networks.hyperneat.Substrate;
@@ -406,7 +407,24 @@ public class HyperNEATCPPNGenotype extends TWEANNGenotype {
 	 * @return NodeGene for substrate
 	 */
 	public NodeGene newSubstrateNodeGene(Substrate sub, double bias) {
-		return newNodeGene(sub.getFtype(), sub.getStype(), innovationID++, false, bias, normalizedNodeMemory);
+		int nodeType = -1;
+		switch(sub.getStype()) {
+		case Substrate.INPUT_SUBSTRATE:
+			nodeType = Node.NTYPE_INPUT;
+			break;
+		case Substrate.PROCCESS_SUBSTRATE:
+			nodeType = Node.NTYPE_HIDDEN;
+			break;
+		case Substrate.OUTPUT_SUBSTRATE:
+			nodeType = Node.NTYPE_OUTPUT;
+			break;
+		case Substrate.ICOORDCONV_SUBSTRATE:
+		case Substrate.JCOORDCONV_SUBSTRATE:
+			nodeType = Node.NTYPE_COORDCONV;
+			break;
+		}
+		assert nodeType != -1;
+		return newNodeGene(sub.getFtype(), nodeType, innovationID++, false, bias, normalizedNodeMemory);
 	}
 
 	/**

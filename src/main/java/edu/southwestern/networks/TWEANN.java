@@ -21,6 +21,7 @@ import edu.southwestern.networks.hyperneat.Substrate;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.util.CombinatoricUtilities;
+import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.graphics.DrawingPanel;
 import edu.southwestern.util.graphics.GraphicsUtil;
 import edu.southwestern.util.graphics.Plot;
@@ -103,8 +104,8 @@ public class TWEANN implements Network {
 			assert!Double.isNaN(weight) : "weight is NaN before transmit";
 			assert!Double.isNaN(signal * weight) : "signal * weight is NaN before transmit: " + signal + "*" + weight;
 			//if(target.innovation == 9) System.out.print(" to "+target.innovation+ ":" + target.sum + " += receiving " + signal + "*"+weight+"; ");
-            target.sum += (signal * weight);
-            //if(target.innovation == 9) System.out.println("new sum:" + target.sum);
+			target.sum += (signal * weight);
+			//if(target.innovation == 9) System.out.println("new sum:" + target.sum);
 			assert!Double.isNaN(target.sum) : "target.sum is NaN after transmit: " + signal + "*" + weight;
 		}
 	}
@@ -116,6 +117,7 @@ public class TWEANN implements Network {
 		public static final int NTYPE_INPUT = 0;
 		public static final int NTYPE_HIDDEN = 1;
 		public static final int NTYPE_OUTPUT = 2;
+		public static final int NTYPE_COORDCONV = 3;
 		// Networks never change after being created (only the genotypes evolve)
 		public final int ntype;
 		public final int ftype;
@@ -166,9 +168,12 @@ public class TWEANN implements Network {
 				return "Hidden";
 			case NTYPE_OUTPUT:
 				return "Output";
+			case NTYPE_COORDCONV:
+				return "CoordConv";
 			}
 			// Should never reach
 			System.out.println(ntype + " is not a valid type of neuron");
+			MiscUtil.printStackTrace();
 			System.exit(1);
 			return "ERROR";
 		}
@@ -176,7 +181,7 @@ public class TWEANN implements Network {
 		public Node(int ftype, int ntype, long innovation) {
 			this(ftype, ntype, innovation, 0.0);
 		}
-		
+
 		/**
 		 * New node with no targets, not frozen by default
 		 *
@@ -186,9 +191,9 @@ public class TWEANN implements Network {
 		 *            = type of node: input, hidden, output
 		 * @param innovation
 		 *            = unique innovation number for node
-                 * @param bias
-                 *            = bias offset added to neuron sum before activation function.
-                 *              (primarily needed by substrate networks from CPPNs)
+		 * @param bias
+		 *            = bias offset added to neuron sum before activation function.
+		 *              (primarily needed by substrate networks from CPPNs)
 		 */
 		public Node(int ftype, int ntype, long innovation, double bias) {
 			this(ftype, ntype, innovation, false, bias);
@@ -205,9 +210,9 @@ public class TWEANN implements Network {
 		 *            = unique innovation number for node
 		 * @param frozen
 		 *            = true if new link mutations cannot target this node
-                 * @param bias
-                 *            = bias offset added to neuron sum before activation function.
-                 *              (primarily needed by substrate networks from CPPNs)
+		 * @param bias
+		 *            = bias offset added to neuron sum before activation function.
+		 *              (primarily needed by substrate networks from CPPNs)
 		 */
 		public Node(int ftype, int ntype, long innovation, boolean frozen, double bias) {
 			this.innovation = innovation;
@@ -235,7 +240,7 @@ public class TWEANN implements Network {
 		public double output() {
 			return activation;
 		}
-		
+
 		/**
 		 * Should only be used for testing purposes
 		 * @param a new activation
@@ -258,15 +263,15 @@ public class TWEANN implements Network {
 		}
 
 		protected void activateAndTransmit() {
-            activate();
-            // reset sum to original bias after activation 
+			activate();
+			// reset sum to original bias after activation 
 			sum = bias;
 
 			for (Link l : outputs) {
 				l.transmit(activation);
 			}
 		}
-		
+
 		/**
 		 * Current value of internal sum variable
 		 * @return
@@ -274,7 +279,7 @@ public class TWEANN implements Network {
 		public double getSum() {
 			return sum;
 		}
-		
+
 		/**
 		 * Current value of internal activation variable
 		 * @return
@@ -302,7 +307,7 @@ public class TWEANN implements Network {
 		protected void connect(Node target, double weight, long innovation, boolean recurrent, boolean frozen) {
 			connect(target, weight, innovation, recurrent, frozen, -1);
 		}
-		
+
 		/**
 		 * Same as above, but specifies the module that defined the link
 		 * (meaning that a CPPN module defined this substrate network link)
@@ -338,12 +343,12 @@ public class TWEANN implements Network {
 	}
 
 	public long getId() { return id; };
-	
+
 	private long id = -1;
 	protected int numIn;
 	protected int numOut;
 	private int numModes;
-	
+
 	private int neuronsPerModule;
 	private boolean standardMultitask;
 	private boolean hierarchicalMultitask;
@@ -525,28 +530,29 @@ public class TWEANN implements Network {
 			TWEANNGenotype.NodeGene ng = g.nodes.get(i);
 			Node n = ng instanceof NormalizedMemoryNodeGene ? 
 					new NormalizedMemoryNode(this, ng.ftype, ng.ntype, ng.innovation, ng.isFrozen(), ng.getBias(), ng.getMemoryGamma(), ng.getMemoryBeta()): 
-					new Node(ng.ftype, ng.ntype, ng.innovation, ng.isFrozen(), ng.getBias());
-			switch (ng.ntype) {
-			case Node.NTYPE_INPUT:
-				assert(section == Node.NTYPE_INPUT) : "Genome encoded false network: inputs: \n" + g;
-				countIn++;
-				break;
-			case Node.NTYPE_HIDDEN:
-				if (section != Node.NTYPE_HIDDEN) {
-					assert(section == Node.NTYPE_INPUT) : "Genome encoded false network: hidden\n" + g;
-					section = Node.NTYPE_HIDDEN;
-				}
-				break;
-			case Node.NTYPE_OUTPUT:
-				if (section != Node.NTYPE_OUTPUT) {
-					assert(section == Node.NTYPE_HIDDEN
-							|| section == Node.NTYPE_INPUT) : "Genome encoded false network: output\n" + g;
-					section = Node.NTYPE_OUTPUT;
-				}
-				countOut++;
-				break;
-			}
-			nodes.add(n);
+						new Node(ng.ftype, ng.ntype, ng.innovation, ng.isFrozen(), ng.getBias());
+					switch (ng.ntype) {
+					case Node.NTYPE_INPUT:
+						assert(section == Node.NTYPE_INPUT) : "Genome encoded false network: inputs: \n" + g;
+						countIn++;
+						break;
+					case Node.NTYPE_HIDDEN:
+						if (section != Node.NTYPE_HIDDEN) {
+							assert(section == Node.NTYPE_INPUT) : "Genome encoded false network: hidden\n" + g;
+							section = Node.NTYPE_HIDDEN;
+						}
+						break;
+					case Node.NTYPE_OUTPUT:
+						if (section != Node.NTYPE_OUTPUT) {
+							assert(section == Node.NTYPE_HIDDEN
+									|| section == Node.NTYPE_INPUT) : "Genome encoded false network: output\n" + g;
+							section = Node.NTYPE_OUTPUT;
+						}
+						countOut++;
+						break;
+						//TODO:CoordConv
+					}
+					nodes.add(n);
 		}
 
 		this.numIn = countIn;
@@ -557,7 +563,7 @@ public class TWEANN implements Network {
 		this.hierarchicalMultitask = g.hierarchicalMultitask;
 		if (g.moduleAssociations != null) { // This is a backwards compatibility
 			// issue:
-                        // This array was added for the Hierarchical Multitask networks
+			// This array was added for the Hierarchical Multitask networks
 			this.moduleAssociations = Arrays.copyOf(g.moduleAssociations, numModes);
 		} else { // In older networks, simply associate each module with its own mode
 			moduleAssociations = new int[this.numModes];
@@ -566,10 +572,10 @@ public class TWEANN implements Network {
 			}
 		}
 		// Is true if net has one mode
-//		assert(numModes != 1 || numOut <= neuronsPerModule + 1) : "Too many outputs for one mode" + "\n" + "g.getId():"
-//		+ g.getId() + "\n" + "g.archetypeIndex:" + g.archetypeIndex + "\n" + "g.numIn:" + g.numIn + "\n"
-//		+ "g.numOut:" + g.numOut + "\n" + "g.nodes.size():" + g.nodes.size() + "\n"
-//		+ "EvolutionaryHistory.archetypeOut:" + Arrays.toString(EvolutionaryHistory.archetypeOut);
+		//		assert(numModes != 1 || numOut <= neuronsPerModule + 1) : "Too many outputs for one mode" + "\n" + "g.getId():"
+		//		+ g.getId() + "\n" + "g.archetypeIndex:" + g.archetypeIndex + "\n" + "g.numIn:" + g.numIn + "\n"
+		//		+ "g.numOut:" + g.numOut + "\n" + "g.nodes.size():" + g.nodes.size() + "\n"
+		//		+ "EvolutionaryHistory.archetypeOut:" + Arrays.toString(EvolutionaryHistory.archetypeOut);
 		// Is true if net has more than one mode
 		assert(numModes == 1
 				|| numOut == (neuronsPerModule + (standardMultitask || CommonConstants.ensembleModeMutation ? 0 : 1))
@@ -687,7 +693,7 @@ public class TWEANN implements Network {
 		for (int i = 0; i < nodes.size(); i++) {
 			nodes.get(i).activateAndTransmit();
 		}
-		
+
 		// Option: if there is remaining activation in the output neurons, 
 		// then process it. Used when importing CPPNs from original Picbreeder
 		if(finalPassOnOutputActivation) {
@@ -698,7 +704,7 @@ public class TWEANN implements Network {
 				}
 			}
 		}
-		
+
 		// All outputs
 
 		double[] preferences = new double[numModes];
@@ -734,18 +740,18 @@ public class TWEANN implements Network {
 			// determine winner
 			chosenModule = CommonConstants.softmaxModeSelection 
 					? StatisticsUtilities.softmax(preferences, CommonConstants.softmaxTemperature)
-					: StatisticsUtilities.argmax(preferences);
-					
-			this.moduleUsage[chosenModule]++;
+							: StatisticsUtilities.argmax(preferences);
 
-			// add new fatigue
-			preferenceFatigue[chosenModule] += CommonConstants.preferenceNeuronFatigueUnit;
-			// decay fatigue
-			for (int i = 0; i < preferenceFatigue.length; i++) {
-				if (i != chosenModule) { // don't decay chosen mode
-					preferenceFatigue[i] *= CommonConstants.preferenceNeuronDecay;
-				}
-			}
+					this.moduleUsage[chosenModule]++;
+
+					// add new fatigue
+					preferenceFatigue[chosenModule] += CommonConstants.preferenceNeuronFatigueUnit;
+					// decay fatigue
+					for (int i = 0; i < preferenceFatigue.length; i++) {
+						if (i != chosenModule) { // don't decay chosen mode
+							preferenceFatigue[i] *= CommonConstants.preferenceNeuronDecay;
+						}
+					}
 		}
 
 		double[] outputs = new double[neuronsPerModule];
@@ -864,17 +870,17 @@ public class TWEANN implements Network {
 	public void passSubstrateInformation(List<Substrate> substrateInformation) {
 		this.substrateInformation = substrateInformation;
 	}
-	
+
 	/**
 	 * Creates and updates visuals of substrates used by h-neat tetris task 
 	 */
 	public void animateSubstrate() {
-//			for(Substrate s : substrateInformation) { 
-//				System.out.println(s);
-//			}
-			HyperNEATVisualizationUtil.drawSubstrates(nodes, substrateInformation);
-			//tweannGenotype has getLinkBetween
-			//just need to find a way to get neuron innovation numbers
+		//			for(Substrate s : substrateInformation) { 
+		//				System.out.println(s);
+		//			}
+		HyperNEATVisualizationUtil.drawSubstrates(nodes, substrateInformation);
+		//tweannGenotype has getLinkBetween
+		//just need to find a way to get neuron innovation numbers
 	}
 
 	private static void refreshActivation(DrawingPanel inputPanel, double[] inputs, double[] outputs, double[] preferences, boolean multitask, double[] preferenceFatigue) {
@@ -979,7 +985,7 @@ public class TWEANN implements Network {
 		Graphics2D g = prepPanel(panel, Color.BLACK);//this part actually draws network
 		drawNetwork(g, panel.getFrame().getHeight(), panel.getFrame().getWidth(), showInnovationNumbers, showWeights);
 	}
-	
+
 	/**
 	 * Draw network on the given Graphics instance
 	 * @param g
@@ -1026,11 +1032,22 @@ public class TWEANN implements Network {
 	private void createLayers() {
 		layers = new ArrayList<ArrayList<Node>>();
 		layers.add(getNodesToDraw(0, numIn, Node.NTYPE_INPUT));//manually loads nodes from TWEANN into layers
-		ArrayList<Node> hidden = getNodesToDraw(numIn, nodes.size() - numOut, Node.NTYPE_HIDDEN);
+		int numCoordConvNodes = 0;
+		if(Parameters.parameters.booleanParameter("useCoordConv")) {
+			Node currentNode = nodes.get(numIn);
+			while(currentNode.ntype == Node.NTYPE_COORDCONV) {
+				numCoordConvNodes++;
+				currentNode = nodes.get(numIn + numCoordConvNodes);
+			}
+			layers.add(getNodesToDraw(numIn, numIn + numCoordConvNodes, Node.NTYPE_COORDCONV));
+		}
+		ArrayList<Node> hidden = getNodesToDraw(numIn + numCoordConvNodes, nodes.size() - numOut, Node.NTYPE_HIDDEN);
+		//Why do the hidden layers need to be sorted but not the input or output? - Devon
 		ArrayList<ArrayList<Node>> hiddenLayers = sortHiddenLayers(hidden);
 		for (int i = 0; i < hiddenLayers.size(); i++) {
 			layers.add(hiddenLayers.get(i));
 		}
+
 		layers.add(getNodesToDraw(nodes.size() - numOut, nodes.size(), Node.NTYPE_OUTPUT));
 	}
 
@@ -1078,7 +1095,7 @@ public class TWEANN implements Network {
 			g.setColor(Color.GREEN);
 		}
 	}
-	
+
 	/**
 	 * Draw the network links on the graphics instance
 	 * @param g Graphics
@@ -1194,11 +1211,14 @@ public class TWEANN implements Network {
 	 */
 	protected ArrayList<Node> getNodesToDraw(int start, int end, int ntype) {
 		ArrayList<Node> result = new ArrayList<Node>(end-start);
+		//MiscUtil.waitForReadStringAndEnterKeyPress(nodes);
 		for (int i = start; i < end; i++) {
 			Node inNode = nodes.get(i);
 			if (inNode.ntype == ntype) {
 				result.add(inNode);
 			} else {
+				System.out.println("ntype: " + ntype + "\ninNode.ntype: " + inNode.ntype + 
+						"\ni: " + i + "\nstart: " + start);
 				throw new IllegalArgumentException("node array is out of order!");
 			}
 		}
@@ -1387,7 +1407,7 @@ public class TWEANN implements Network {
 		g.setColor(Color.RED);
 		g.fillRect(x, y, (int) ((1 + activation) * NODE_DIM), (int) ((1 + activation) * NODE_DIM));
 	}
-	
+
 	/**
 	 * draws input nodes
 	 * @param g graphics object
@@ -1402,7 +1422,7 @@ public class TWEANN implements Network {
 		g.setColor(Color.BLUE);
 		g.fillRect(x, y, (int) ((1 + activation) * NODE_DIM), (int) ((1 + activation) * NODE_DIM));
 	}
-	
+
 	/**
 	 * adds border to node if frozen and corresponding to activation function
 	 * @param g graphic object
