@@ -10,6 +10,7 @@ import edu.southwestern.evolution.genotypes.HyperNEATCPPNGenotype;
 import edu.southwestern.networks.ActivationFunctions;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
+import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.datastructures.Pair;
 import edu.southwestern.util.datastructures.Quint;
 import edu.southwestern.util.datastructures.Triple;
@@ -465,54 +466,60 @@ public class HyperNEATUtil {
 	public static void addCoordConvSubstrateAndConnections(List<Substrate> substrates, List<SubstrateConnectivity> connections, int numInputSubstrates) {
 		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 		assert(!CommonConstants.substrateLocationInputs);
-		//hash map of (size of sub, layer of sub) objects to (iCoordConvName, jCoordConvName) strings. 
-		//Contains a size/layer combo if it has been added to the substrates list. If this combo has been added to the substrate list then this hashmap allows retrieval of its coord conv names
-		HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>> coordConvSubSizeAndLayerToIAndJNames = new HashMap<Pair<Pair<Integer, Integer>, Integer>, Pair<String, String>>();
 		int numCoordConvSubstratesAdded = 0; //this is for determining the location in vector space of each coord conv
 		int coordConvSubstrateNameIndex = 0; //increments after the addition of the i and j coord convs
 		int connectionsSize = connections.size(); //required to be separate from the for loop because we are adding to connections within the loop
 		for(int i = 0; i < connectionsSize; i++) {
 			SubstrateConnectivity substrateConnectivity = connections.get(i);
 			if(substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
-				Pair<Pair<Integer, Integer>, Integer> sourceSubstrateSizeAndLayer = getSubstrateSizeAndLayerFromName(substrates, substrateConnectivity.sourceSubstrateName); //new Pair<Pair<Integer, Integer>, Integer>(sourceSubstrateSize, substrateLayer);
+				Pair<Pair<Integer, Integer>, Integer> sourceSubstrateSizeAndLayer = getSubstrateSizeAndLayerFromName(substrates, substrateConnectivity.sourceSubstrateName);
+				String iCoordConvSubstrateName = null;
+				String jCoordConvSubstrateName = null;
+				for(Substrate substrate: substrates) {
+					if(substrate.getSize().equals(sourceSubstrateSizeAndLayer.t1) && substrate.getSubLocation().t2.equals(sourceSubstrateSizeAndLayer.t2)) { 
+						if(substrate.getStype() == Substrate.ICOORDCONV_SUBSTRATE) {
+							iCoordConvSubstrateName = substrate.getName();
+						} else if (substrate.getStype() == Substrate.JCOORDCONV_SUBSTRATE) {
+							jCoordConvSubstrateName = substrate.getName();
+						}
+					}
+				}
 				//this is also equivalent to the location in the substrate list that the new coordConvSubstrate will be added
 				int iCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded;
 				int jCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded + 1;
-				String iCoordConvName;
-				String jCoordConvName;
-				if (coordConvSubSizeAndLayerToIAndJNames.containsKey(sourceSubstrateSizeAndLayer)) {
-					Pair<String, String> CoordConvSourceNamesToConnect = coordConvSubSizeAndLayerToIAndJNames.get(sourceSubstrateSizeAndLayer);
-					iCoordConvName = CoordConvSourceNamesToConnect.t1;
-					jCoordConvName = CoordConvSourceNamesToConnect.t2;
-				} else {
-					iCoordConvName = "iCoordConv(" + coordConvSubstrateNameIndex + ",0)";
-					jCoordConvName = "jCoordConv(" + coordConvSubstrateNameIndex + ",0)";
+				//creates new iCoordConv and jCoordConv substrates
+				if(iCoordConvSubstrateName == null) {
+					assert jCoordConvSubstrateName == null;
+					iCoordConvSubstrateName = "iCoordConv(" + coordConvSubstrateNameIndex + ",0)";
+					jCoordConvSubstrateName = "jCoordConv(" + coordConvSubstrateNameIndex + ",0)";
 					Triple<Integer, Integer, Integer> iCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(iCoordConvXCoordinate, 0, 0);
 					Triple<Integer, Integer, Integer> jCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(jCoordConvXCoordinate, 0, 0);
 					Substrate iCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.ICOORDCONV_SUBSTRATE, iCoordConvNewSubLocation,
-							iCoordConvName, ActivationFunctions.FTYPE_ID);
+							iCoordConvSubstrateName, ActivationFunctions.FTYPE_ID);
 					Substrate jCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.JCOORDCONV_SUBSTRATE, jCoordConvNewSubLocation,
-							jCoordConvName, ActivationFunctions.FTYPE_ID);
+							jCoordConvSubstrateName, ActivationFunctions.FTYPE_ID);
 					substrates.add(iCoordConvXCoordinate, iCoordConvSubstrate);
 					substrates.add(jCoordConvXCoordinate, jCoordConvSubstrate);
-					coordConvSubSizeAndLayerToIAndJNames.put(sourceSubstrateSizeAndLayer, new Pair<String, String>(iCoordConvName, jCoordConvName));
 					numCoordConvSubstratesAdded += 2;
 					coordConvSubstrateNameIndex++;
 				}
-				boolean previouslyAdded = false;
+				boolean previouslyAdded = false; //true if a specific connection has been added to substrate connectivity, false otherwise
 				for(SubstrateConnectivity connection: connections) {
-					if(connection.sourceSubstrateName.equals(iCoordConvName) && connection.targetSubstrateName.equals(substrateConnectivity.targetSubstrateName) 
+					if(connection.sourceSubstrateName.equals(iCoordConvSubstrateName) && connection.targetSubstrateName.equals(substrateConnectivity.targetSubstrateName) 
 							&& connection.receptiveFieldWidth == substrateConnectivity.receptiveFieldWidth && connection.receptiveFieldHeight == substrateConnectivity.receptiveFieldHeight) {
 						previouslyAdded = true;
 						break;
 					}
 				}
 				if (!previouslyAdded) {
-					connections.add(new SubstrateConnectivity(iCoordConvName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
-					connections.add(new SubstrateConnectivity(jCoordConvName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
+					connections.add(new SubstrateConnectivity(iCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
+					connections.add(new SubstrateConnectivity(jCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
 				}
 			}
 		}
+		System.out.println("substrates" + substrates);
+		System.out.println("\nconnections" + connections);
+		MiscUtil.waitForReadStringAndEnterKeyPress();
 	}
 
 	/**
