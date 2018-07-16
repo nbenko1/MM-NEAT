@@ -389,8 +389,8 @@ public class HyperNEATUtil {
 				if (substrateConnectivity.connectivityType == SubstrateConnectivity.CTYPE_CONVOLUTION) {
 					Pair<Pair<Integer, Integer>, Integer> sourceSubstrateSizeAndLayer = getSubstrateSizeAndLayerFromName(substrates, substrateConnectivity.sourceSubstrateName);
 					int coordConvIdentificationHash = new Quint<Pair<Integer, Integer>, Integer, String, Integer, Integer>(
-									sourceSubstrateSizeAndLayer.t1, sourceSubstrateSizeAndLayer.t2, substrateConnectivity.targetSubstrateName, 
-									substrateConnectivity.receptiveFieldHeight, substrateConnectivity.receptiveFieldWidth).hashCode();
+							sourceSubstrateSizeAndLayer.t1, sourceSubstrateSizeAndLayer.t2, substrateConnectivity.targetSubstrateName, 
+							substrateConnectivity.receptiveFieldHeight, substrateConnectivity.receptiveFieldWidth).hashCode();
 					if(!accountedForCoordConvIdentifications.contains(coordConvIdentificationHash)) {
 						accountedForCoordConvIdentifications.add(coordConvIdentificationHash);
 						numCoordConvConnections += 2; //connections for both the i and j substrates
@@ -475,31 +475,32 @@ public class HyperNEATUtil {
 				Pair<Pair<Integer, Integer>, Integer> sourceSubstrateSizeAndLayer = getSubstrateSizeAndLayerFromName(substrates, substrateConnectivity.sourceSubstrateName);
 				String iCoordConvSubstrateName = null;
 				String jCoordConvSubstrateName = null;
+				int numSubstratesInLayerOfSource = 0;
 				for(Substrate substrate: substrates) {
-					if(substrate.getSize().equals(sourceSubstrateSizeAndLayer.t1) && substrate.getSubLocation().t2.equals(sourceSubstrateSizeAndLayer.t2)) { 
-						if(substrate.getStype() == Substrate.ICOORDCONV_SUBSTRATE) {
-							iCoordConvSubstrateName = substrate.getName();
-						} else if (substrate.getStype() == Substrate.JCOORDCONV_SUBSTRATE) {
-							jCoordConvSubstrateName = substrate.getName();
+					if (substrate.getSubLocation().t2.equals(sourceSubstrateSizeAndLayer.t2)) {
+						numSubstratesInLayerOfSource++;
+						if(substrate.getSize().equals(sourceSubstrateSizeAndLayer.t1)) {
+							if(substrate.getStype() == Substrate.ICOORDCONV_SUBSTRATE) {
+								iCoordConvSubstrateName = substrate.getName();
+							} else if (substrate.getStype() == Substrate.JCOORDCONV_SUBSTRATE) {
+								jCoordConvSubstrateName = substrate.getName();
+							}
 						}
 					}
 				}
-				//this is also equivalent to the location in the substrate list that the new coordConvSubstrate will be added
-				int iCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded;
-				int jCoordConvXCoordinate = numInputSubstrates + numCoordConvSubstratesAdded + 1;
 				//creates new iCoordConv and jCoordConv substrates
 				if(iCoordConvSubstrateName == null) {
 					assert jCoordConvSubstrateName == null;
-					iCoordConvSubstrateName = "iCoordConv(" + coordConvSubstrateNameIndex + ",0)";
-					jCoordConvSubstrateName = "jCoordConv(" + coordConvSubstrateNameIndex + ",0)";
-					Triple<Integer, Integer, Integer> iCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(iCoordConvXCoordinate, 0, 0);
-					Triple<Integer, Integer, Integer> jCoordConvNewSubLocation = new Triple<Integer, Integer, Integer>(jCoordConvXCoordinate, 0, 0);
-					Substrate iCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.ICOORDCONV_SUBSTRATE, iCoordConvNewSubLocation,
+					iCoordConvSubstrateName = "iCoordConv(" + numSubstratesInLayerOfSource + "," + sourceSubstrateSizeAndLayer.t2 + ")";
+					jCoordConvSubstrateName = "jCoordConv(" + (numSubstratesInLayerOfSource + 1) + "," + sourceSubstrateSizeAndLayer.t2 + ")";
+					Substrate iCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.ICOORDCONV_SUBSTRATE, 
+							new Triple<Integer, Integer, Integer>(numSubstratesInLayerOfSource, sourceSubstrateSizeAndLayer.t2, 0),
 							iCoordConvSubstrateName, ActivationFunctions.FTYPE_ID);
-					Substrate jCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.JCOORDCONV_SUBSTRATE, jCoordConvNewSubLocation,
+					Substrate jCoordConvSubstrate = new Substrate(sourceSubstrateSizeAndLayer.t1, Substrate.JCOORDCONV_SUBSTRATE, 
+							new Triple<Integer, Integer, Integer>(numSubstratesInLayerOfSource + 1, sourceSubstrateSizeAndLayer.t2, 0),
 							jCoordConvSubstrateName, ActivationFunctions.FTYPE_ID);
-					substrates.add(iCoordConvXCoordinate, iCoordConvSubstrate);
-					substrates.add(jCoordConvXCoordinate, jCoordConvSubstrate);
+					substrates.add(numInputSubstrates + numCoordConvSubstratesAdded, iCoordConvSubstrate);
+					substrates.add(numInputSubstrates + numCoordConvSubstratesAdded + 1, jCoordConvSubstrate);
 					numCoordConvSubstratesAdded += 2;
 					coordConvSubstrateNameIndex++;
 				}
@@ -512,14 +513,13 @@ public class HyperNEATUtil {
 					}
 				}
 				if (!previouslyAdded) {
-					connections.add(new SubstrateConnectivity(iCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
-					connections.add(new SubstrateConnectivity(jCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
+					connections.add(new SubstrateConnectivity(iCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, 
+							substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
+					connections.add(new SubstrateConnectivity(jCoordConvSubstrateName, substrateConnectivity.targetSubstrateName, 
+							substrateConnectivity.receptiveFieldWidth, substrateConnectivity.receptiveFieldHeight));
 				}
 			}
 		}
-		System.out.println("substrates" + substrates);
-		System.out.println("\nconnections" + connections);
-		MiscUtil.waitForReadStringAndEnterKeyPress();
 	}
 
 	/**
