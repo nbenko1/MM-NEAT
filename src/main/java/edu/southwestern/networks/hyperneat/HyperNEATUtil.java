@@ -10,7 +10,6 @@ import edu.southwestern.evolution.genotypes.HyperNEATCPPNGenotype;
 import edu.southwestern.networks.ActivationFunctions;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
-import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.datastructures.Pair;
 import edu.southwestern.util.datastructures.Quint;
 import edu.southwestern.util.datastructures.Triple;
@@ -467,7 +466,6 @@ public class HyperNEATUtil {
 		//this implementation with naive coordConvNewSubLocation will cause problems with global coordinates.
 		assert(!CommonConstants.substrateLocationInputs);
 		int numCoordConvSubstratesAdded = 0; //this is for determining the location in vector space of each coord conv
-		int coordConvSubstrateNameIndex = 0; //increments after the addition of the i and j coord convs
 		int connectionsSize = connections.size(); //required to be separate from the for loop because we are adding to connections within the loop
 		for(int i = 0; i < connectionsSize; i++) {
 			SubstrateConnectivity substrateConnectivity = connections.get(i);
@@ -502,7 +500,6 @@ public class HyperNEATUtil {
 					substrates.add(numInputSubstrates + numCoordConvSubstratesAdded, iCoordConvSubstrate);
 					substrates.add(numInputSubstrates + numCoordConvSubstratesAdded + 1, jCoordConvSubstrate);
 					numCoordConvSubstratesAdded += 2;
-					coordConvSubstrateNameIndex++;
 				}
 				boolean previouslyAdded = false; //true if a specific connection has been added to substrate connectivity, false otherwise
 				for(SubstrateConnectivity connection: connections) {
