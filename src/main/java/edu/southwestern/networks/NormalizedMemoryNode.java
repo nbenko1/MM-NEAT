@@ -32,7 +32,7 @@ public class NormalizedMemoryNode extends TWEANN.Node{
 
 			//calculate variance
 			memorySumOfSquares += (immediateActivation - oldMean) * (immediateActivation - memoryMean);
-			double nodeNormalizationActivationThreshold = Parameters.parameters.doubleParameter("nodeNormalizationThreshold");
+			double nodeNormalizationActivationThreshold = Parameters.parameters.doubleParameter("nodeNormalizationActivationThreshold");
 			if (immediateActivation >=  nodeNormalizationActivationThreshold || immediateActivation < -nodeNormalizationActivationThreshold) {
 				double variance = memorySumOfSquares / numActivationsSeen;
 
