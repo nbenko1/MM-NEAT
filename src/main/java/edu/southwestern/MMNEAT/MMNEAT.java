@@ -43,8 +43,8 @@ import edu.southwestern.networks.hyperneat.HyperNEATDummyTask;
 import edu.southwestern.networks.hyperneat.HyperNEATSpeedTask;
 import edu.southwestern.networks.hyperneat.HyperNEATTask;
 import edu.southwestern.networks.hyperneat.HyperNEATUtil;
-import edu.southwestern.networks.hyperneat.SubstrateArchitectureDefinition;
 import edu.southwestern.networks.hyperneat.SubstrateCoordinateMapping;
+import edu.southwestern.networks.hyperneat.architecture.SubstrateArchitectureDefinition;
 import edu.southwestern.parameters.CommonConstants;
 import edu.southwestern.parameters.Parameters;
 import edu.southwestern.scores.Score;
@@ -66,6 +66,8 @@ import edu.southwestern.tasks.gvgai.GVGAISinglePlayerTask;
 import edu.southwestern.tasks.innovationengines.PictureInnovationTask;
 import edu.southwestern.tasks.innovationengines.ShapeInnovationTask;
 import edu.southwestern.tasks.interactive.InteractiveEvolutionTask;
+import edu.southwestern.tasks.interactive.mario.MarioLevelBreederTask;
+import edu.southwestern.tasks.mario.MarioLevelTask;
 import edu.southwestern.tasks.mario.MarioTask;
 import edu.southwestern.tasks.microrts.MicroRTSTask;
 import edu.southwestern.tasks.microrts.SinglePopulationCompetativeCoevolutionMicroRTSTask;
@@ -96,8 +98,10 @@ import edu.southwestern.tasks.rlglue.init.RLGlueInitialization;
 import edu.southwestern.tasks.rlglue.tetris.HyperNEATTetrisTask;
 import edu.southwestern.tasks.testmatch.MatchDataTask;
 import edu.southwestern.tasks.ut2004.UT2004Task;
+import edu.southwestern.tasks.ut2004.UT2004Util;
 import edu.southwestern.tasks.vizdoom.VizDoomTask;
 import edu.southwestern.util.ClassCreation;
+import edu.southwestern.util.MiscUtil;
 import edu.southwestern.util.file.FileUtilities;
 import edu.southwestern.util.graphics.DrawingPanel;
 import edu.southwestern.util.random.RandomGenerator;
@@ -165,7 +169,7 @@ public class MMNEAT {
 	@SuppressWarnings("rawtypes")
 	public static TwoDimensionalBoardGameViewer boardGameViewer;
 	public static SubstrateArchitectureDefinition substrateArchitectureDefinition;
-	
+
 	public static MMNEAT mmneat;
 
 	@SuppressWarnings("rawtypes")
@@ -240,8 +244,8 @@ public class MMNEAT {
 
 	private static void setupTWEANNGenotypeDataTracking(boolean coevolution) {
 		if (genotype instanceof TWEANNGenotype || 
-			genotype instanceof CombinedGenotype || // Assume first member of pair is TWEANNGenotype
-			genotype instanceof HyperNEATCPPNforDL4JGenotype) { // Contains CPPN that is TWEANNGenotype
+				genotype instanceof CombinedGenotype || // Assume first member of pair is TWEANNGenotype
+				genotype instanceof HyperNEATCPPNforDL4JGenotype) { // Contains CPPN that is TWEANNGenotype
 			if (Parameters.parameters.booleanParameter("io")
 					&& Parameters.parameters.booleanParameter("logTWEANNData")) {
 				System.out.println("Init TWEANN Log");
@@ -255,11 +259,11 @@ public class MMNEAT {
 			long biggestInnovation = genotype instanceof CombinedGenotype ? 
 					((TWEANNGenotype) ((CombinedGenotype) genotype).t1).biggestInnovation() :
 						(genotype instanceof HyperNEATCPPNforDL4JGenotype ?
-						((HyperNEATCPPNforDL4JGenotype) genotype).getCPPN().biggestInnovation()	:
-					((TWEANNGenotype) genotype).biggestInnovation());
-			if (biggestInnovation > EvolutionaryHistory.largestUnusedInnovationNumber) {
-				EvolutionaryHistory.setInnovation(biggestInnovation + 1);
-			}
+								((HyperNEATCPPNforDL4JGenotype) genotype).getCPPN().biggestInnovation()	:
+									((TWEANNGenotype) genotype).biggestInnovation());
+					if (biggestInnovation > EvolutionaryHistory.largestUnusedInnovationNumber) {
+						EvolutionaryHistory.setInnovation(biggestInnovation + 1);
+					}
 		}
 	}
 
@@ -410,7 +414,7 @@ public class MMNEAT {
 					modesToTrack = multitaskModes;
 				}
 			}
-			
+
 			if(Parameters.parameters.classParameter("boardGame") != null){
 				boardGame = (BoardGame) ClassCreation.createObject("boardGame");
 				if(boardGame instanceof TwoDimensionalBoardGame){
@@ -423,7 +427,7 @@ public class MMNEAT {
 					boardGameViewer = null;
 				}
 			}
-			
+
 			task = (Task) ClassCreation.createObject("task");
 			System.out.println("Load task: " + task);
 			boolean multiPopulationCoevolution = false;
@@ -434,7 +438,7 @@ public class MMNEAT {
 				System.out.println("Set pre-eaten pills high, since we are scaling pills with generation");
 				Parameters.parameters.setDouble("preEatenPillPercentage", 0.999);
 			}
-			
+
 			HyperNEATTask HNTSeedTask = (HyperNEATTask) ClassCreation.createObject("hyperNEATSeedTask");
 			if(CommonConstants.hyperNEAT || HNTSeedTask != null) {
 				if(Parameters.parameters.booleanParameter("useHyperNEATCustomArchitecture")) {
@@ -443,11 +447,11 @@ public class MMNEAT {
 				// For each substrate layer pairing, there can be multiple output neurons in the CPPN
 				HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair = CommonConstants.leo ? 2 : 1;
 				// Number of output neurons needed to designate bias values across all substrates
-				HyperNEATCPPNGenotype.numBiasOutputs = CommonConstants.evolveHyperNEATBias ? 
-						(HNTSeedTask == null ? 
-							HyperNEATUtil.numBiasOutputsNeeded() :
-							HyperNEATUtil.numBiasOutputsNeeded(HNTSeedTask)) : 
-						0;				
+				//				HyperNEATCPPNGenotype.numBiasOutputs = CommonConstants.evolveHyperNEATBias ? 
+				//						(HNTSeedTask == null ? 
+				//							HyperNEATUtil.numBiasOutputsNeeded() :
+				//							HyperNEATUtil.numBiasOutputsNeeded(HNTSeedTask)) : 
+				//						0;				
 			}
 			if(Parameters.parameters.booleanParameter("hallOfFame")){
 				hallOfFame = new HallOfFame();
@@ -456,44 +460,49 @@ public class MMNEAT {
 				System.out.println("Setup Function Optimization");
 				// Already setup in setupFunctionOptimization();
 			} else if (task instanceof MsPacManTask) {
-				MsPacManInitialization.setupGenotypePoolsForMsPacman();
-				System.out.println("Setup Ms. Pac-Man Task");
-				pacmanInputOutputMediator = (MsPacManControllerInputOutputMediator) ClassCreation.createObject("pacmanInputOutputMediator");
-				if (MMNEAT.pacmanInputOutputMediator instanceof VariableDirectionBlockLoadedInputOutputMediator) {
-					directionalSafetyFunction = (VariableDirectionBlock) ClassCreation.createObject("directionalSafetyFunction");
-					ensembleArbitrator = (MsPacManEnsembleArbitrator) ClassCreation.createObject("ensembleArbitrator");
-				}
-				String preferenceNet = Parameters.parameters.stringParameter("fixedPreferenceNetwork");
-				String multitaskNet = Parameters.parameters.stringParameter("fixedMultitaskPolicy");
-				if (multitaskNet != null && !multitaskNet.isEmpty()) {
-					// Preference networks are being evolved to pick outputs of
-					// fixed multitask network
-					MMNEAT.sharedMultitaskNetwork = (TWEANNGenotype) Easy.load(multitaskNet);
-					if (CommonConstants.showNetworks) {
-						DrawingPanel panel = new DrawingPanel(TWEANN.NETWORK_VIEW_DIM, TWEANN.NETWORK_VIEW_DIM, "Fixed Multitask Network");
-						MMNEAT.sharedMultitaskNetwork.getPhenotype().draw(panel);
-					}
-					// One preference neuron per multitask mode
-					setNNInputParameters(pacmanInputOutputMediator.numIn(), MMNEAT.sharedMultitaskNetwork.numModules);
-				} else if (preferenceNet != null && !preferenceNet.isEmpty()) {
-					MMNEAT.sharedPreferenceNetwork = (TWEANNGenotype) Easy.load(preferenceNet);
-					if (CommonConstants.showNetworks) {
-						DrawingPanel panel = new DrawingPanel(TWEANN.NETWORK_VIEW_DIM, TWEANN.NETWORK_VIEW_DIM, "Fixed Preference Network");
-						MMNEAT.sharedPreferenceNetwork.getPhenotype().draw(panel);
-					}
-					// One preference neuron per multitask mode
-					setNNInputParameters(pacmanInputOutputMediator.numIn(), MMNEAT.sharedPreferenceNetwork.numOut);
-				} else if (Parameters.parameters.booleanParameter("evolveGhosts")) {
-					System.out.println("Evolving the Ghosts!");
+				//TODO: Allow for evolution of ghost teams
+				if(Parameters.parameters.booleanParameter("evolveGhosts")){
+					System.out.println("we are evolving a ghost!");
 					ghostsInputOutputMediator = new GhostsCheckEachDirectionMediator();
 					setNNInputParameters(ghostsInputOutputMediator.numIn(), ghostsInputOutputMediator.numOut());
 				} else {
-					// Regular Check-Each-Direction networks
-					setNNInputParameters(pacmanInputOutputMediator.numIn(), pacmanInputOutputMediator.numOut());
-				}
-				MsPacManInitialization.setupMsPacmanParameters();
-				if (CommonConstants.multitaskModules > 1) {
-					pacmanMultitaskScheme = (MsPacManModeSelector) ClassCreation.createObject("pacmanMultitaskScheme");
+					MsPacManInitialization.setupGenotypePoolsForMsPacman();
+					System.out.println("Setup Ms. Pac-Man Task");
+					pacmanInputOutputMediator = (MsPacManControllerInputOutputMediator) ClassCreation.createObject("pacmanInputOutputMediator");
+					if (MMNEAT.pacmanInputOutputMediator instanceof VariableDirectionBlockLoadedInputOutputMediator) {
+						directionalSafetyFunction = (VariableDirectionBlock) ClassCreation.createObject("directionalSafetyFunction");
+						ensembleArbitrator = (MsPacManEnsembleArbitrator) ClassCreation.createObject("ensembleArbitrator");
+					}
+					String preferenceNet = Parameters.parameters.stringParameter("fixedPreferenceNetwork");
+					String multitaskNet = Parameters.parameters.stringParameter("fixedMultitaskPolicy");
+					if (multitaskNet != null && !multitaskNet.isEmpty()) {
+						// Preference networks are being evolved to pick outputs of
+						// fixed multitask network
+						MMNEAT.sharedMultitaskNetwork = (TWEANNGenotype) Easy.load(multitaskNet);
+						if (CommonConstants.showNetworks) {
+							DrawingPanel panel = new DrawingPanel(TWEANN.NETWORK_VIEW_DIM, TWEANN.NETWORK_VIEW_DIM, "Fixed Multitask Network");
+							MMNEAT.sharedMultitaskNetwork.getPhenotype().draw(panel);
+						}
+						// One preference neuron per multitask mode
+						setNNInputParameters(pacmanInputOutputMediator.numIn(), MMNEAT.sharedMultitaskNetwork.numModules);
+					} else if (preferenceNet != null && !preferenceNet.isEmpty()) {
+						MMNEAT.sharedPreferenceNetwork = (TWEANNGenotype) Easy.load(preferenceNet);
+						if (CommonConstants.showNetworks) {
+							DrawingPanel panel = new DrawingPanel(TWEANN.NETWORK_VIEW_DIM, TWEANN.NETWORK_VIEW_DIM, "Fixed Preference Network");
+							MMNEAT.sharedPreferenceNetwork.getPhenotype().draw(panel);
+						}
+						// One preference neuron per multitask mode
+						setNNInputParameters(pacmanInputOutputMediator.numIn(), MMNEAT.sharedPreferenceNetwork.numOut);
+					} else if (Parameters.parameters.booleanParameter("evolveGhosts")) {
+						System.out.println("Evolving the Ghosts!");
+					} else {
+						// Regular Check-Each-Direction networks
+						setNNInputParameters(pacmanInputOutputMediator.numIn(), pacmanInputOutputMediator.numOut());
+					}
+					MsPacManInitialization.setupMsPacmanParameters();
+					if (CommonConstants.multitaskModules > 1) {
+						pacmanMultitaskScheme = (MsPacManModeSelector) ClassCreation.createObject("pacmanMultitaskScheme");
+					}
 				}
 			} else if (task instanceof CooperativeMsPacManTask) {
 				System.out.println("Setup Coevolution Ms. Pac-Man Task");
@@ -518,7 +527,7 @@ public class MMNEAT {
 			} else if (task instanceof SinglePopulationCompetativeCoevolutionMicroRTSTask){
 				SinglePopulationCompetativeCoevolutionMicroRTSTask temp = (SinglePopulationCompetativeCoevolutionMicroRTSTask) task;
 				setNNInputParameters(temp.sensorLabels().length, 1); //only one output because it is utility value for state being evaluated
-				
+
 			} else if (task instanceof RLGlueTask) {
 				setNNInputParameters(rlGlueExtractor.numFeatures(), RLGlueTask.agent.getNumberOutputs());
 			} else if (task instanceof PinballTask) {
@@ -533,7 +542,7 @@ public class MMNEAT {
 			} else if (task instanceof MultiPopulationCompetativeCoevolutionBoardGameTask) {
 				System.out.println("Setup Multi-Population Board Game Coevolution Task");
 				multiPopulationCoevolution = true;
-				
+
 				MultiPopulationCompetativeCoevolutionBoardGameTask temp = (MultiPopulationCompetativeCoevolutionBoardGameTask) task;
 				setNNInputParameters(temp.sensorLabels().length, temp.outputLabels().length);	
 
@@ -544,11 +553,11 @@ public class MMNEAT {
 					if(genotype instanceof TWEANNGenotype) {
 						((TWEANNGenotype) gene).archetypeIndex = i;
 					}
-					
+
 					genotypeExamples.add(gene);
 				}
 				prepareCoevolutionArchetypes();
-				
+
 			} else if (task instanceof GVGAISinglePlayerTask) {
 				GVGAISinglePlayerTask temp = (GVGAISinglePlayerTask) task;
 				setNNInputParameters(temp.sensorLabels().length, temp.outputLabels().length);
@@ -641,6 +650,13 @@ public class MMNEAT {
 				}
 				prepareCoevolutionArchetypes();
 			} else if (task instanceof UT2004Task) {
+				if(Parameters.parameters.booleanParameter("overwriteGameBots")) {
+					if(Parameters.parameters.booleanParameter("botprizeMod")) {
+						UT2004Util.copyBotPrizeVersionOfGameBots();
+					} else {
+						UT2004Util.copyDefaultVersionOfGameBots();
+					}
+				}
 				System.out.println("Setup UT2004 Task");
 				UT2004Task utTask = (UT2004Task) task;
 				setNNInputParameters(utTask.sensorModel.numberOfSensors(), utTask.outputModel.numberOfOutputs());
@@ -667,6 +683,9 @@ public class MMNEAT {
 			} else if (task instanceof MarioTask) {
 				setNNInputParameters(((Parameters.parameters.integerParameter("marioInputWidth") * Parameters.parameters.integerParameter("marioInputHeight")) * 2) + 1, MarioTask.MARIO_OUTPUTS); //hard coded for now, 5 button outputs
 				System.out.println("Set up Mario Task");
+			} else if (task instanceof MarioLevelTask) {
+				setNNInputParameters(MarioLevelBreederTask.INPUTS.length, MarioLevelBreederTask.OUTPUTS.length);
+				System.out.println("Set up Mario Level Task");
 			} else if(task instanceof HyperNEATDummyTask) {
 				System.out.println("set up dummy hyperNEAT task. Used for testing purposes only");
 			} else if(task instanceof HyperNEATSpeedTask) {
@@ -681,7 +700,7 @@ public class MMNEAT {
 				System.out.println(task);
 				System.exit(1);
 			}
-			
+
 			// Only loads if settings indicate that this should be used
 			ScoreHistory.load();
 
@@ -731,7 +750,7 @@ public class MMNEAT {
 				int numSubstratePairings = HNTSeedTask.getSubstrateConnectivity().size();
 				System.out.println("Number of substrate pairs being connected: "+ numSubstratePairings);
 				assert HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair > 0 : "HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair must be positive";
-				HyperNEATCPPNGenotype hntGeno = new HyperNEATCPPNGenotype(HyperNEATUtil.numCPPNInputs(HNTSeedTask),  numSubstratePairings * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair + HyperNEATCPPNGenotype.numBiasOutputs, 0);
+				HyperNEATCPPNGenotype hntGeno = new HyperNEATCPPNGenotype(HyperNEATUtil.numCPPNInputs(HNTSeedTask),  numSubstratePairings * HyperNEATCPPNGenotype.numCPPNOutputsPerLayerPair + HyperNEATUtil.numBiasOutputsNeeded(HNTSeedTask), 0);
 				TWEANNGenotype seedGeno = hntGeno.getSubstrateGenotypeForEvolution(HNTSeedTask);
 				genotype = seedGeno;
 				System.out.println("Genotype seeded from HyperNEAT task substrate specification");
@@ -788,6 +807,7 @@ public class MMNEAT {
 			// Other tasks may also use this mapping in the future.
 			HyperNEATTetrisTask.reduce2DTo1D = true;
 		}		
+		HyperNEATCPPNGenotype.normalizedNodeMemory = Parameters.parameters.booleanParameter("normalizedNodeMemory");
 	}
 
 	/**
