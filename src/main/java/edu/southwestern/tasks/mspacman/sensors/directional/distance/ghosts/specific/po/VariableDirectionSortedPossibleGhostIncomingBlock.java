@@ -1,56 +1,49 @@
-package edu.southwestern.tasks.mspacman.sensors.directional.distance.ghosts.po;
+package edu.southwestern.tasks.mspacman.sensors.directional.distance.ghosts.specific.po;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import edu.southwestern.tasks.mspacman.facades.GameFacade;
 import edu.southwestern.tasks.mspacman.sensors.directional.VariableDirectionBlock;
 import edu.southwestern.util.datastructures.Quad;
-import edu.southwestern.util.datastructures.Triple;
 import pacman.game.Constants.MOVE;
 
-
 /**
- * Possible ghosts are those that we can see and those that we have a probability for.
- * This block sorts possible ghosts by distance and returns the orderth ghost away's probability.
- * 
- * @author Will Price
- *
+ * @author Will Price, Jacob Schrum
  */
-public class VariableDirectionSortedPossibleGhostProbabilityBlock extends VariableDirectionBlock{
+public class VariableDirectionSortedPossibleGhostIncomingBlock extends VariableDirectionBlock {
 
 	private final int order;
 	private final boolean sortThreats;
 	private final boolean sortEdibles;
-	
-	public VariableDirectionSortedPossibleGhostProbabilityBlock(int order, boolean sortThreats, boolean sortEdibles) {
-		this(-1, order, sortThreats, sortEdibles);
+
+	/**
+	 * @param order
+	 */
+	public VariableDirectionSortedPossibleGhostIncomingBlock(int order) {
+		this(order, true, true);
 	}
-		
-	public VariableDirectionSortedPossibleGhostProbabilityBlock(int order) {
-		this(-1, order, true, true);
-	}
 	
-	public VariableDirectionSortedPossibleGhostProbabilityBlock(int dir, int order, boolean sortThreats, boolean sortEdibles) {
-		super(dir);
+	public VariableDirectionSortedPossibleGhostIncomingBlock(int order, boolean sortThreats, boolean sortEdibles) {
+		super(-1);
 		this.order = order;
-		this.sortEdibles = sortEdibles;
 		this.sortThreats = sortThreats;
+		this.sortEdibles = sortEdibles;
 	}
 
 	@Override
 	public double wallValue() {
-		//if there is a wall, the probability of a ghost being there is surely zero
 		return 0;
 	}
 
 	@Override
 	public double getValue(GameFacade gf) {
-		
 		ArrayList<Quad<Integer, MOVE, Double, Double>> ghosts = gf.getPossibleGhostInfo();
-			
+		
 		if(sortThreats && !sortEdibles) {
 			ListIterator<Quad<Integer, MOVE, Double, Double>> itr = ghosts.listIterator();
 			//remove edible ghosts from the list
@@ -71,15 +64,10 @@ public class VariableDirectionSortedPossibleGhostProbabilityBlock extends Variab
 			}
 		}
 		
-//		System.out.println("----------------------------------------");
-//		System.out.println(this.getLabel() + " in " + dir + ": ");
-//		System.out.println(ghosts);
-		
 		if (order >= ghosts.size()) {
 			return 0.0; // Target in lair will result in distance of
 								// infinity
 		}
-		
 		Collections.sort(ghosts, new Comparator<Quad<Integer, MOVE, Double, Double>>(){
 
 			@Override
@@ -100,22 +88,30 @@ public class VariableDirectionSortedPossibleGhostProbabilityBlock extends Variab
 				
 			}
 		});
-			
-		
-		//returns the shortest path to the order (1st, 2nd, 3rd, etc) possible ghost away
-		return ghosts.get(order).t3;
+
+		//calculate if the ghost is incoming
+		int current = gf.getPacmanCurrentNodeIndex();
+		assert current != -1 : "we can't see pacman";
+		int[] neighbors = gf.neighbors(current);
+		//assert neighbors[pacmanDir] != -1 : "Pacman dir is a wall: " + pacmanDir + "; " + Arrays.toString(neighbors);
+		try {
+		int[] ghostPath = gf.poG.getShortestPath(ghosts.get(order).t1.intValue(), current, ghosts.get(order).t2);
+		return ArrayUtils.contains(ghostPath, neighbors[dir]) ? 1 : 0;
+		} catch(java.lang.NullPointerException e) {
+			System.out.println(ghosts);
+			throw e;
+		}
 	}
 
 	@Override
 	public String getLabel() {
 		if(sortThreats && !sortEdibles) {
-			return "Probability of " + order + " Closest Possible Threat Ghost in " + dir + "direction";
+			return order + " Closest Incoming Possible Threat Ghost in " + dir + "direction";
 		} else if(!sortThreats && sortEdibles) {
-			return "Probability of " + order + " Closest Possible Edible Ghost in " + dir + "direction";
+			return order + " Closest Incoming Possible Edible Ghost in " + dir + "direction";
 		} else {
-			return "Probability of " + order + " Closest Possible Ghost in " + dir + "direction";	
+			return order + " Closest IncomingPossible Ghost in " + dir + "direction";	
 		}
 	}
-	
-
 }
+

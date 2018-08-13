@@ -302,7 +302,7 @@ public class MyPacMan extends PacmanController{
 			//init the ghost predictions
 			if(ghostPredictions == null){				
 				//create a new ghostPredictionFast object, initialize it, and pass it to informedGameFacade
-				ghostPredictions = new GhostPredictionsFast(informedGameFacade.poG.getCurrentMaze());
+				ghostPredictions = new GhostPredictionsFast(informedGameFacade.poG.getCurrentMaze(), ghostEdibleTime);
 	            ghostPredictions.preallocate();
 	            informedGameFacade.setGhostPredictions(this.ghostPredictions);
 			} 
@@ -333,7 +333,7 @@ public class MyPacMan extends PacmanController{
 	            }
 	        }
 			
-	        ghostPredictions.update();
+	        ghostPredictions.update(informedGameFacade);
 	        informedGameFacade.setGhostPredictions(ghostPredictions);
 		}
 		

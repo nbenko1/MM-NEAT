@@ -61,6 +61,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 /build/
+/coghosts/
 /dist/
 /nbproject/
 /bin
@@ -94,6 +95,8 @@ $RECYCLE.BIN/
 /microRTS/
 /HNMsPacMan/
 /ut2004/
+/coghosts/
+/poghosts/
 /popacman/
 # Some of UT^2's log files end up with this naming convention
 *-null
