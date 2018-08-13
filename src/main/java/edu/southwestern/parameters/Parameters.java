@@ -47,6 +47,7 @@ import micro.ai.mcts.uct.UCT;
 import oldpacman.controllers.examples.Legacy;
 import oldpacman.controllers.examples.StarterPacMan;
 import oldpacman.game.Constants;
+import popacman.examples.StarterPacMan.MyPacMan;
 
 /**
  * Used for processing and containing command line parameters.
@@ -593,6 +594,7 @@ public class Parameters {
 		booleanOptions.add("onlyModeMutationWhenModesSame", false, "Only allow mode mutation if whole population has same number of modes");
 		booleanOptions.add("onlyWatchPareto", true, "When using LoadAndWatchExperiment, only watch the Pareto front");
 		booleanOptions.add("otherDirSensors", false, "Check-Each mediators include sensors that tell the current dir about other dirs");
+		booleanOptions.add("overwriteGameBots", true, "determines whether the version of gamebots present on the computer should be overwritten");
 		booleanOptions.add("pacManGainsLives", false, "Whether or not Pac-Man can gain new lives");
 		booleanOptions.add("pacmanGhostInput", true, "if true pacman can sense ghost location");
 		booleanOptions.add("pacManLureFitness", false, "Pacman evolved using luring fitness");
