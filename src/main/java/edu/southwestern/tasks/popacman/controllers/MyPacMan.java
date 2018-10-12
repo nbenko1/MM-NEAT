@@ -21,6 +21,7 @@ import popacman.prediction.fast.GhostPredictionsFast;
 import wox.serial.Easy;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
+import pacman.game.Drawable;
 import pacman.game.internal.Maze;
 import pacman.game.Game;
 import pacman.controllers.PacmanController;
@@ -29,7 +30,7 @@ import pacman.controllers.PacmanController;
  * @author pricew
  *
  */
-public class MyPacMan extends PacmanController{
+public class MyPacMan extends PacmanController implements Drawable{
 
 	protected final oldpacman.controllers.NewPacManController oldpacman;
 	public static final String CHAMPION_FILE = "bestPacMan.xml";
@@ -48,8 +49,7 @@ public class MyPacMan extends PacmanController{
 	public final double GHOST_THRESHOLD = Parameters.parameters.doubleParameter("probabilityThreshold");
 	
 	private static final oldpacman.controllers.NewPacManController getController(String file) {
-		//Parameters.initializeParameterCollections("maxGens:200 mu:100 io:true netio:true mating:true highLevel:true infiniteEdibleTime:false imprisonedWhileEdible:false pacManLevelTimeLimit:8000 pacmanInputOutputMediator:edu.southwestern.tasks.mspacman.sensors.mediators.po.POCheckEachDirectionMediator trials:10 log:OneLifeSplit-TwoModuleMultitask saveTo:TwoModuleMultitask fs:false edibleTime:200 trapped:true specificGhostEdibleThreatSplit:true specificGhostProximityOrder:true specific:false multitaskModes:3 pacmanMultitaskScheme:edu.southwestern.tasks.mspacman.multitask.po.POProbableGhostStateModeSelector3Mod perLinkMutateRate:0.05 netLinkRate:0.4 netSpliceRate:0.2 crossoverRate:0.5 partiallyObservablePacman:true pacmanPO:true useGhostModel:true usePillModel:true probabilityThreshold:0.49 ghostPO:true rawScorePacMan:true logTWEANNData:true".split(" "));
-//		TWEANNGenotype wtf = (TWEANNGenotype) Easy.load(file);
+		Parameters.initializeParameterCollections("drawGhostPredictions:true io:false netio:false highLevel:true infiniteEdibleTime:false imprisonedWhileEdible:false pacManLevelTimeLimit:2147483647 pacmanInputOutputMediator:edu.southwestern.tasks.mspacman.sensors.mediators.po.POCheckEachDirectionMediator edibleTime:200 trapped:true specificGhostEdibleThreatSplit:true specificGhostProximityOrder:true specific:false multitaskModes:3 pacmanMultitaskScheme:edu.southwestern.tasks.mspacman.multitask.po.POProbableGhostStateModeSelector3Mod partiallyObservablePacman:true pacmanPO:true useGhostModel:true usePillModel:true probabilityThreshold:0.125 ghostPO:true rawScorePacMan:true".split(" "));
 		MMNEAT.loadClasses();
 		return (NewPacManController) (new NNMsPacMan<TWEANN>(((TWEANNGenotype) Easy.load(file))).controller);
 	}
@@ -206,9 +206,9 @@ public class MyPacMan extends PacmanController{
 
     //determines whether or not to use this classes draw method
 	public boolean enabled() {
-//		if(Parameters.parameters.booleanParameter("drawGhostPredictions") || Parameters.parameters.booleanParameter("drawPillModel")) {
-//			return true;
-//		}
+		if(Parameters.parameters.booleanParameter("drawGhostPredictions") || Parameters.parameters.booleanParameter("drawPillModel")) {
+			return true;
+		}
 		return false;
 	}
 	
