@@ -7,8 +7,10 @@ import wox.serial.Easy;
 
 public class NetworkToJSON {
 	
+	static String FILENAME = "bestPacMan0.xml";
+	
 	public static String networkToJson(String filename) {
-		TWEANNGenotype network = (TWEANNGenotype) Easy.load("bestPacMan.xml");
+		TWEANNGenotype network = (TWEANNGenotype) Easy.load(FILENAME);
 		String JSON = "";
 		
 		JSON = JSON + "{\n";
