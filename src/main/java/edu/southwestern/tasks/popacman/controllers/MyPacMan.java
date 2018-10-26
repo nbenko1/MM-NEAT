@@ -51,7 +51,9 @@ public class MyPacMan extends PacmanController implements Drawable{
 	private static final oldpacman.controllers.NewPacManController getController(String file) {
 		Parameters.initializeParameterCollections("drawGhostPredictions:true io:false netio:false highLevel:true task:edu.southwestern.tasks.mspacman.MsPacManTask infiniteEdibleTime:false imprisonedWhileEdible:false pacManLevelTimeLimit:2147483647 pacmanInputOutputMediator:edu.southwestern.tasks.mspacman.sensors.mediators.po.POCheckEachDirectionMediator edibleTime:200 trapped:true specificGhostEdibleThreatSplit:true specificGhostProximityOrder:true specific:false multitaskModes:3 pacmanMultitaskScheme:edu.southwestern.tasks.mspacman.multitask.po.POProbableGhostStateModeSelector3Mod partiallyObservablePacman:true pacmanPO:true useGhostModel:true usePillModel:true probabilityThreshold:0.125 ghostPO:true rawScorePacMan:true".split(" "));
 		MMNEAT.loadClasses();
-		return (NewPacManController) (new NNMsPacMan<TWEANN>(((TWEANNGenotype) Easy.load(file))).controller);
+		TWEANNGenotype genotype = (TWEANNGenotype) Easy.load(file);
+		System.out.println(genotype);
+		return (NewPacManController) (new NNMsPacMan<TWEANN>(genotype).controller);
 	}
 	
 	public MyPacMan() {
