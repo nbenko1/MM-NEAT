@@ -9,6 +9,7 @@ import edu.southwestern.boardGame.agents.BoardGamePlayer;
 import edu.southwestern.boardGame.agents.HeuristicBoardGamePlayer;
 import edu.southwestern.boardGame.featureExtractor.BoardGameFeatureExtractor;
 import edu.southwestern.boardGame.fitnessFunction.BoardGameFitnessFunction;
+import edu.southwestern.boardGame.fitnessFunction.CheckersAdvancedFitness;
 import edu.southwestern.boardGame.fitnessFunction.OpeningRandomMovesScore;
 import edu.southwestern.boardGame.fitnessFunction.OthelloPieceFitness;
 import edu.southwestern.boardGame.fitnessFunction.SimpleWinLoseDrawBoardGameFitness;
@@ -60,6 +61,14 @@ public class StaticOpponentBoardGameTask<T extends Network, S extends BoardGameS
 		if(Parameters.parameters.booleanParameter("boardGameSimpleFitness")){
 			fitFunctions.add(new SimpleWinLoseDrawBoardGameFitness<S>());
 		}
+		
+		//-------------------
+		
+		if(Parameters.parameters.booleanParameter("boardGameCheckersFitness")){
+			fitFunctions.add(new CheckersAdvancedFitness<S>());
+		}
+		//-------------------
+		
 		if(Parameters.parameters.booleanParameter("boardGameOthelloFitness")){
 			fitFunctions.add((BoardGameFitnessFunction<S>) new OthelloPieceFitness());
 		}
