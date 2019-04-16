@@ -15,6 +15,7 @@ import edu.southwestern.boardGame.agents.BoardGamePlayer;
  */
 public class CheckersAdvancedFitness<T extends BoardGameState> implements BoardGameFitnessFunction<T> {
 
+	
 	private static final int KING = 2; // Checkers is structured so that the
 										// Index for Kings is PlayerIndex + 2
 
