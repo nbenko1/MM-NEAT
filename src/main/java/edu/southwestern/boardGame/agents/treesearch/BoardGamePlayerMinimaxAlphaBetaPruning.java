@@ -17,6 +17,8 @@ public class BoardGamePlayerMinimaxAlphaBetaPruning<T extends BoardGameState> ex
 		prune = true;
 	}
 
+	
+	
 	@Override
 	protected double minimax(T bgState, int depth, double alpha, double beta, boolean maxPlayer) {
 		//System.out.println(maxPlayer + ":" + depth + ": alpha: " + alpha.getValue() + ", beta: " + beta.getValue());
