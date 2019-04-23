@@ -646,7 +646,7 @@ public class Parameters {
 		booleanOptions.add("relativePacmanDirections", true, "Ms. Pac-Man senses and actions for directions are relative to current direction");
 		booleanOptions.add("rememberObservations", false, "remember the inputs/observations of an evaluation to be used for the syllabus of Behavioral Diversity");
 		booleanOptions.add("removePillsNearPowerPills", false, "Pills in a c-path with power pills are absent");
-
+		// added by Nicholai from old version to run advanced fitness for checkers
 		booleanOptions.add("boardGameCheckersFitness", false, "Enables the CheckersAdvanced BoardGame Fitness Function to be used as a Selection Function");
 
 		booleanOptions.add("replayPacman", false, "Replay pacman game from save file");

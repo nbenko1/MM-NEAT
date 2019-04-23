@@ -59,7 +59,7 @@ public class BoardGameBenchmarkAllPopExperiment<T extends Network, S extends Boa
 		
 		try {
 			bg = (BoardGame<S>) ClassCreation.createObject("boardGame");
-			selectionFunction = (BoardGameFitnessFunction<S>) ClassCreation.createObject("boardGameFitnessFunction");
+			//selectionFunction = (BoardGameFitnessFunction<S>) ClassCreation.createObject("boardGameFitnessFunction");
 			featExtract = (BoardGameFeatureExtractor<S>) ClassCreation.createObject("boardGameFeatureExtractor");
 			player = (HeuristicBoardGamePlayer<S>) ClassCreation.createObject("boardGamePlayer"); // The Player
 			opponent = (BoardGamePlayer<S>) ClassCreation.createObject("boardGameOpponent");
@@ -69,7 +69,9 @@ public class BoardGameBenchmarkAllPopExperiment<T extends Network, S extends Boa
 		}
 		
 
-		MMNEAT.registerFitnessFunction(selectionFunction.getFitnessName());
+		// Just trying anything to make this work
+		//MMNEAT.registerFitnessFunction(selectionFunction.getFitnessName());
+		MMNEAT.registerFitnessFunction("Win/Loss?");
 		
 		// Add Other Scores here to keep track of other Fitness Functions
 		fitFunctions.add(new SimpleWinLoseDrawBoardGameFitness<S>());
@@ -100,7 +102,7 @@ public class BoardGameBenchmarkAllPopExperiment<T extends Network, S extends Boa
 				cppnPanel = drawPanels.t2;
 				
 				panel.setVisible(true);
-				cppnPanel.setVisible(true);
+				if(cppnPanel != null) cppnPanel.setVisible(true);
 			}
 			
 			

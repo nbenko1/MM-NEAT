@@ -56,7 +56,8 @@ public class BoardGameUtil {
 			// Reset game and fitness functions before each play
 			bg.reset();
 			for(BoardGameFitnessFunction fitFunct : fitScores){
-				fitFunct.reset();
+				// Need some kind of fitness ... right?
+				if(fitFunct != null) fitFunct.reset();
 			}
 			for(BoardGameFitnessFunction fitFunct : otherFit){
 				fitFunct.reset();
@@ -84,7 +85,8 @@ public class BoardGameUtil {
 				}
 				
 				for(BoardGameFitnessFunction fitFunct : fitScores){
-					fitFunct.updateFitness(bg.getCurrentState(), playIndex);
+					// Why is this null
+					if(fitFunct != null) fitFunct.updateFitness(bg.getCurrentState(), playIndex);
 				}
 				for(BoardGameFitnessFunction fitFunct : otherFit){
 					fitFunct.updateFitness(bg.getCurrentState(), playIndex);
