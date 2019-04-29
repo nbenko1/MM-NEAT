@@ -19,7 +19,7 @@ public class CustomCheckersFeatureExtractor<T extends TwoDimensionalBoardGameSta
 	public double[] getFeatures(T bgs) {
 		double[] originalRaw = bgs.getDescriptor();
 		
-		double[] ourNewFeatures = new double[6]; //TODO
+		double[] ourNewFeatures = new double[10]; //TODO
 		
 		
 
@@ -27,19 +27,39 @@ public class CustomCheckersFeatureExtractor<T extends TwoDimensionalBoardGameSta
 		// 1 == opponent check
 		// 2 == player king
 		// 3 == opponent king
+		int x = 0;
+		int y = 0;
 		for (double d : originalRaw) { // loops through each square on the checkers board
+
 			if (d == 0) { // Found a Player Check
 				//playerChecks
 				ourNewFeatures[0]++;
+				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
+					ourNewFeatures[6]++; // number of save checks
+				}
 			} else if (d == 2) { // Found a Player King
 				//playerKings
 				ourNewFeatures[1]++;
+				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
+					ourNewFeatures[7]++; // number of save checks
+				}
 			} else if (d == 1) { // Found an Enemy Check
 				//opponentChecks
 				ourNewFeatures[2]++;
+				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
+					ourNewFeatures[8]++; // number of save checks
+				}
 			} else if (d == 3) { // Found an Enemy King
 				//opponentKings
 				ourNewFeatures[3]++;
+				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
+					ourNewFeatures[9]++; // number of save checks
+				}
+			}
+			x++; //update x coordinate
+			x = x%8; //wrap around
+			if(x == 0) { //if x is wrapped around 
+				y++; //increase y
 			}
 		}
 		
@@ -64,7 +84,7 @@ public class CustomCheckersFeatureExtractor<T extends TwoDimensionalBoardGameSta
 	 */
 	@Override
 	public String[] getFeatureLabels() {
-		String[] result = new String[(board.getBoardHeight() * board.getBoardWidth()) + 6];
+		String[] result = new String[(board.getBoardHeight() * board.getBoardWidth())+10];
 		for(int j = 0; j < board.getBoardHeight(); j++) {
 			for(int i = 0; i < board.getBoardWidth(); i++) {
 				result[j * board.getBoardWidth() + i] = "Space ("+i+","+j+")";
@@ -81,6 +101,10 @@ public class CustomCheckersFeatureExtractor<T extends TwoDimensionalBoardGameSta
 		result[boardSize + 3]  = "OpponentKings";
 		result[boardSize + 4]  = "ChecksDiff";
 		result[boardSize + 5]  = "KingsDiff";
+		result[boardSize + 6]  = "SafeCheck";
+		result[boardSize + 7]  = "SafeKing";
+		result[boardSize + 8]  = "OpSafeCheck";
+		result[boardSize + 9]  = "OpSafeKing";
 		
 		//doesn't work with strings
 		//String[] combinedLabels = ArrayUtil.combineArrays(result, additionalFeatureLabels);
