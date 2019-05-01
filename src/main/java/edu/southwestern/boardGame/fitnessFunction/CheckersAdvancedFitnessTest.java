@@ -14,10 +14,10 @@ import edu.southwestern.boardGame.checkers.CheckersState;
  * 
  * http://eplex.cs.ucf.edu/papers/gauci_aaai08.pdf
  */
-public class CheckersAdvancedFitness<T extends BoardGameState> implements BoardGameFitnessFunction<T> {
+public class CheckersAdvancedFitnessTest<T extends CheckersState> implements BoardGameFitnessFunction<T> {
 
 	
-	private static final int KING = 2; // Checkers is structured so that the
+	//private static final int KING = 2; // Checkers is structured so that the
 										// Index for Kings is PlayerIndex + 2
 
 	private double[] fitness = new double[2]; // Checkers always has two players
@@ -38,32 +38,33 @@ public class CheckersAdvancedFitness<T extends BoardGameState> implements BoardG
 
 		double[] description = bgs.getDescriptor();
 
-//		for (double d : description) {
-//			if(index == 0) {
-//				if(d == 0.5) {
-//					playerChecks++;
-//				} else if(d == 0.75) {
-//					playerKings++;
-//				}
-//			}
-//			if(index == 1) {
-//				if(d == -0.5) {
-//					playerChecks++;
-//				} else if(d == -0.75) {
-//					playerKings++;
-//				}
-//			}
-//		
 		for (double d : description) {
-			if (d == index) { // Found a Player Check
-				playerChecks++;
-			} else if (d == index + KING) { // Found a Player King
-				playerKings++;
-			} else if (d == (index + 1) % 2) { // Found an Enemy Check
-				opponentChecks++;
-			} else if (d == (index + 1) % 2 + KING) { // Found an Enemy King
-				opponentKings++;
+			if(index == 0) {
+				if(d == 0.5) {
+					playerChecks++;
+				} else if(d == 0.75) {
+					playerKings++;
+				}
 			}
+			if(index == 1) {
+				if(d == -0.5) {
+					playerChecks++;
+				} else if(d == -0.75) {
+					playerKings++;
+				}
+			}
+			
+			
+			
+//			if (d == index + 0.5) { // Found a Player Check
+//				playerChecks++;
+//			} else if (d == index + 0.75) { // Found a Player King
+//				playerKings++;
+//			} else if (d == index - ) { // Found an Enemy Check
+//				opponentChecks++;
+//			} else if (d == (index + 1) % 2 + KING) { // Found an Enemy King
+//				opponentKings++;
+//			}
 		}
 		fitness[index] += (100 + 2 * playerChecks + 3 * playerKings + 2 * (12 - opponentChecks) + 3 * (12 - opponentKings));
 	}
