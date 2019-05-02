@@ -1,7 +1,6 @@
 package edu.southwestern.boardGame.featureExtractor;
 
 import edu.southwestern.MMNEAT.MMNEAT;
-import edu.southwestern.boardGame.TwoDimensionalBoardGameState;
 import edu.southwestern.util.datastructures.ArrayUtil;
 import edu.southwestern.boardGame.checkers.CheckersState;
 
@@ -31,10 +30,7 @@ public class CustomCheckersFeatureExtractor<T extends CheckersState> implements 
 		double[] ourNewFeatures = new double[12];
 		
 		
-		// 0 == player check
-		// 1 == opponent check
-		// 2 == player king
-		// 3 == opponent king
+
 		int x = 0;
 		int y = 0;
 		//starts in the bottom left, moves up
