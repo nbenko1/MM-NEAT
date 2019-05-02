@@ -9,6 +9,7 @@ public class CustomCheckersFeatureExtractor<T extends CheckersState> implements 
 
 	T board;
 
+	//these values are what the is returned by getDescriptor() in CheckersState
 	public double PLAYER_CHECK = 0.5;
 	public double PLAYER_KING = 0.75;
 	public double OP_CHECK = -0.5;
@@ -33,56 +34,68 @@ public class CustomCheckersFeatureExtractor<T extends CheckersState> implements 
 
 		int x = 0;
 		int y = 0;
-		//starts in the bottom left, moves up
-		int trace = 0;
+		//starts in the bottom left, moves up first
+		int trace = 0; //keeps track of where we are in the array
 		for (double d : originalRaw) { // loops through each square on the checkers board
 
-			if (d == PLAYER_CHECK) { // Found a Player Check
+			if (d == PLAYER_CHECK) { // Found a Player Check---------------------------
 				//playerChecks
 				ourNewFeatures[0]++;
 				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
 					ourNewFeatures[6]++; // number of save checks
 				}
-				if(y <= 5) {
-					if(originalRaw[trace] + 9 == OP_CHECK ||originalRaw[trace] + 9 == OP_KING || originalRaw[trace] + 7 == OP_CHECK || originalRaw[trace] + 7 == OP_KING){
+				if(y <= 5) {//checks if the piece can jump forward
+					//Checks if there is a piece that can be taken at either of the forward diagonals
+					if(originalRaw[trace] + 9 != OP_CHECK ||originalRaw[trace] + 9 == OP_KING || originalRaw[trace] + 7 == OP_CHECK || originalRaw[trace] + 7 == OP_KING){
 						ourNewFeatures[10]++;
 					}
 				}
-			} else if (d == PLAYER_KING) { // Found a Player King
+				
+				
+			} else if (d == PLAYER_KING) { // Found a Player King----------------------
 				//playerKings
 				ourNewFeatures[2]++;
 				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
 					ourNewFeatures[7]++; // number of save checks
 				}
-				if(y <= 5 && y >= 2) {
+				if(y <= 5 && y >= 2) { //checks if the piece can jump in either direction
+					//Checks if there is a piece that can be taken at either of the forward diagonals
 					if(originalRaw[trace] + 9 == OP_CHECK ||originalRaw[trace] + 9 == OP_KING || originalRaw[trace] + 7 == OP_CHECK || originalRaw[trace] + 7 == OP_KING){
 						ourNewFeatures[10]++;
 					}
+					//Checks if there is a piece that can be taken at either of the backwards diagonals
 					if(originalRaw[trace] - 7 == OP_CHECK ||originalRaw[trace] - 7 == OP_KING || originalRaw[trace] - 9 == OP_CHECK || originalRaw[trace] - 9 == OP_KING){
 						ourNewFeatures[10]++;
 					}
 				}
-			} else if (d == OP_CHECK) { // Found an Enemy Check
+				
+				
+			} else if (d == OP_CHECK) { // Found an Enemy Check-----------------------------
 				//opponentChecks
 				ourNewFeatures[3]++;
 				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
 					ourNewFeatures[8]++; // number of save checks
 				}
-				if(y >= 2) {
+				if(y >= 2) { //checks if the piece can jump forward
+					//Checks if there is a piece that can be taken at either of the forward diagonals
 					if(originalRaw[trace] - 9 == PLAYER_CHECK ||originalRaw[trace] - 9 == PLAYER_KING || originalRaw[trace] - 7 == PLAYER_CHECK || originalRaw[trace] - 7 == PLAYER_KING){
 						ourNewFeatures[11]++;
 					}
 				}
-			} else if (d == -0.75) { // Found an Enemy King
+				
+				
+			} else if (d == -0.75) { // Found an Enemy King-----------------------------------
 				//opponentKings
 				ourNewFeatures[3]++;
 				if(x==0 || x==7 || y==0 || y == 7) { //if check is up against the wall
 					ourNewFeatures[9]++; // number of save checks
 				}
-				if(y <= 5 && y >= 2) {
+				if(y <= 5 && y >= 2) { //checks if the piece can jump in either direction
+					//Checks if there is a piece that can be taken at either of the forward diagonals
 					if(originalRaw[trace] + 9 == PLAYER_CHECK ||originalRaw[trace] + 9 == PLAYER_KING || originalRaw[trace] + 7 == PLAYER_CHECK || originalRaw[trace] + 7 == PLAYER_KING){
 						ourNewFeatures[10]++;
 					}
+					//Checks if there is a piece that can be taken at either of the backwards diagonals
 					if(originalRaw[trace] - 7 == PLAYER_CHECK ||originalRaw[trace] - 7 == PLAYER_KING || originalRaw[trace] - 9 == PLAYER_CHECK || originalRaw[trace] - 9 == PLAYER_KING){
 						ourNewFeatures[11]++;
 					}
@@ -107,7 +120,7 @@ public class CustomCheckersFeatureExtractor<T extends CheckersState> implements 
 			ourNewFeatures[i] = (ourNewFeatures[i]/12);
 		}
 		
-		double[] result = ArrayUtil.combineArrays(originalRaw, ourNewFeatures);
+		double[] result = ArrayUtil.combineArrays(originalRaw, ourNewFeatures); //combines the new features with the raw board game state
 		
 		return result;
 		
@@ -128,6 +141,8 @@ public class CustomCheckersFeatureExtractor<T extends CheckersState> implements 
 
 
 		int boardSize = board.getBoardHeight() * board.getBoardWidth();
+		
+		//names each new feature individually
 		result[boardSize]      = "PlayerChecks";
 		result[boardSize + 1]  = "PlayerKings";
 		result[boardSize + 2]  = "OpponentChecks";

@@ -3,12 +3,13 @@ package edu.southwestern.boardGame.heuristics;
 import edu.southwestern.boardGame.checkers.CheckersState;
 
 
+//advanced heuristic specifically for checkers
 public class CheckersPieceDifferentialHeuristic<T extends CheckersState> implements BoardGameHeuristic<T>{
 
 	@Override
 	public double heuristicEvalution(T bgs) {
-		double friendlyPieces = 0;
-		double OpPieces = 0;
+		double friendlyPieces = 0; //score of player
+		double OpPieces = 0; //score of opponent
 		
 		double[] board = bgs.getDescriptor();
 		
